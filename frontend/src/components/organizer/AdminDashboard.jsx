@@ -4,7 +4,6 @@ import {
   TrendingUp, RefreshCw, ShieldCheck, Check, X, Clock, MapPin, Sparkles, AlertCircle
 } from 'lucide-react';
 import { SketchButton } from '../common/SketchButton';
-import { StickyNote } from '../common/StickyNote';
 
 export const AdminDashboard = ({ 
   isOpen, 

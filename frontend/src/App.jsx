@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
-import { DemoBadge } from './components/common/DemoBadge';
 import { LandingPage } from './pages/LandingPage';
 import { EventsPage } from './pages/EventsPage';
 import { EventDetailPage } from './pages/EventDetailPage';
@@ -304,9 +303,6 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      {/* Honesty Demo Data Badge Pinned in Viewport */}
-      <DemoBadge onResetDemo={handleResetDemo} />
-
       <ErrorBoundary>
         <Routes>
         {/* 1. Hero Landing Page */}

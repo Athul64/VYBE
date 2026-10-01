@@ -7,7 +7,6 @@ import {
 } from 'lucide-react';
 
 import { SketchButton } from '../components/common/SketchButton';
-import { SketchCard } from '../components/common/SketchCard';
 import { CampusMapSvg } from '../components/map/CampusMapSvg';
 import { ClashBanner } from '../components/feed/ClashBanner';
 import { useSpeech } from '../hooks/useSpeech';
