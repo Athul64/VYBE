@@ -1,0 +1,125 @@
+/* src/styles/handDrawn.css */
+@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Patrick+Hand&display=swap');
+
+body {
+  background-color: #fdfbf7;
+  color: #2d2d2d;
+  background-image: radial-gradient(#e5e0d8 1.5px, transparent 1.5px);
+  background-size: 24px 24px; /* Notebook paper dot-grid */
+  font-family: 'Patrick Hand', cursive;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Wobbly border utility classes */
+.border-wobbly {
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+}
+
+.border-wobbly-md {
+  border-radius: 20px 255px 20px 255px / 255px 20px 255px 20px;
+}
+
+.border-wobbly-pill {
+  border-radius: 255px 25px 225px 25px / 25px 225px 25px 255px;
+}
+
+/* Authentic Paper Tape Decoration */
+.tape-strip {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-1.5deg);
+  width: 90px;
+  height: 24px;
+  background-color: rgba(229, 224, 216, 0.75);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  border-left: 2px dashed rgba(45, 45, 45, 0.25);
+  border-right: 2px dashed rgba(45, 45, 45, 0.25);
+  pointer-events: none;
+  z-index: 20;
+}
+
+.tape-corner {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 60px;
+  height: 20px;
+  transform: rotate(35deg);
+  background-color: rgba(229, 224, 216, 0.85);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-left: 2px dashed rgba(45, 45, 45, 0.25);
+  border-right: 2px dashed rgba(45, 45, 45, 0.25);
+  pointer-events: none;
+  z-index: 20;
+}
+
+/* Red Thumbtack Pin */
+.thumbtack {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 18px;
+  height: 18px;
+  background-color: #ff4d4d;
+  border: 2px solid #2d2d2d;
+  border-radius: 50%;
+  box-shadow: 2px 2px 0px #2d2d2d;
+  z-index: 20;
+}
+.thumbtack::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 4px;
+  width: 4px;
+  height: 4px;
+  background: #ffffff;
+  border-radius: 50%;
+}
+
+.thumbtack-blue {
+  background-color: #2d5da1;
+}
+
+/* Sticky Note Shadow & Curl */
+.sticky-curl {
+  box-shadow: 5px 5px 7px rgba(45, 45, 45, 0.15), 4px 4px 0px #2d2d2d;
+  transform: rotate(-1deg);
+  transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+.sticky-curl:hover {
+  transform: rotate(0deg) scale(1.01);
+  box-shadow: 7px 7px 12px rgba(45, 45, 45, 0.2), 6px 6px 0px #2d2d2d;
+}
+
+/* Red pen strikethrough / underline scribble */
+.red-scribble-underline {
+  background-image: linear-gradient(120deg, transparent 0%, rgba(255, 77, 77, 0.3) 100%);
+  border-bottom: 2px solid #ff4d4d;
+}
+
+/* Notebook ruled line */
+.ruled-lines {
+  background-image: repeating-linear-gradient(
+    transparent,
+    transparent 27px,
+    #e5e0d8 28px
+  );
+  line-height: 28px;
+}
+
+/* Custom scrollbars with hand-drawn aesthetic */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #fdfbf7;
+  border-left: 2px solid #e5e0d8;
+}
+::-webkit-scrollbar-thumb {
+  background: #2d2d2d;
+  border-radius: 4px;
+}
