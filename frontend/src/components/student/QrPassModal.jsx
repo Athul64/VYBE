@@ -16,10 +16,14 @@ export const QrPassModal = ({
 
   if (!isOpen || !event) return null;
 
+  const studentId = student?.student_id || student?.id || "student_01";
+  const studentName = student?.name || "Student";
+  const studentDept = student?.department || "ASIET";
+
   const qrData = JSON.stringify({
     pass_type: "VYBE_CAMPUS_PASS",
-    student_id: student?.id || "student_01",
-    student_name: student?.name || "Student",
+    student_id: studentId,
+    student_name: studentName,
     event_id: event.id,
     event_title: event.title,
     venue_id: event.venue_id,
@@ -33,7 +37,7 @@ export const QrPassModal = ({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          student_id: student?.id || "student_01",
+          student_id: studentId,
           event_id: event.id
         })
       });
@@ -75,7 +79,7 @@ export const QrPassModal = ({
             {event.title}
           </h3>
           <p className="font-hand text-sm text-pencil/70">
-            Admit 1: {student?.name} ({student?.department})
+            Admit 1: {studentName} ({studentDept}) • {studentId}
           </p>
         </div>
 
@@ -91,7 +95,7 @@ export const QrPassModal = ({
             />
           </div>
           <span className="font-mono text-xs text-pencil/70 mt-2 tracking-widest">
-            PASS-ID: #{event.id}-{student?.id || "STU"}
+            PASS-ID: #{event.id}-{studentId}
           </span>
         </div>
 

@@ -1,42 +1,42 @@
 import networkx as nx
 
 CAMPUS_NODES = {
-    # Main Entrance & Quad
-    "N01": {"name": "Main Arch Gate", "x": 100, "y": 550, "type": "entrance"},
-    "N02": {"name": "Security Checkpoint", "x": 160, "y": 500, "type": "outdoor"},
-    "N03": {"name": "Central Quad Green", "x": 300, "y": 420, "type": "outdoor"},
-    "N04": {"name": "Banyan Tree Courtyard", "x": 240, "y": 340, "type": "outdoor"},
+    # ASIET Main Entrance & Quad (MC Road, Mattoor, Kalady)
+    "N01": {"name": "ASIET Main Arch Gate (Kalady)", "x": 100, "y": 550, "type": "entrance"},
+    "N02": {"name": "Main Security Checkpost & Visitors Desk", "x": 160, "y": 500, "type": "outdoor"},
+    "N03": {"name": "Central Quadrangle & Saraswathi Statue", "x": 300, "y": 420, "type": "outdoor"},
+    "N04": {"name": "Gulmohar Courtyard & Palm Garden", "x": 240, "y": 340, "type": "outdoor"},
     
-    # Academic Block A (Computer Science & Labs)
-    "N05": {"name": "Block A Ground Porch", "x": 180, "y": 240, "type": "building"},
-    "N06": {"name": "Block A West Stairs", "x": 140, "y": 180, "type": "stairs"},
-    "N07": {"name": "Block A South Ramp", "x": 220, "y": 200, "type": "ramp"},
-    "N08": {"name": "Turing Lab 101", "x": 160, "y": 120, "type": "building"},
-    "N09": {"name": "Ada Lovelace Hall", "x": 240, "y": 120, "type": "building"},
+    # Aryabhata Academic Block (CSE, AI-DS & Computing Labs)
+    "N05": {"name": "Aryabhata Block Ground Foyer", "x": 180, "y": 240, "type": "building"},
+    "N06": {"name": "Aryabhata West Stairs", "x": 140, "y": 180, "type": "stairs"},
+    "N07": {"name": "Aryabhata Divyangjan Ramp (Accessible)", "x": 220, "y": 200, "type": "ramp"},
+    "N08": {"name": "Turing Advanced Computing Lab (CSE)", "x": 160, "y": 120, "type": "building"},
+    "N09": {"name": "Aryabhata Seminar Hall", "x": 240, "y": 120, "type": "building"},
     
-    # Connecting Covered Walkway
-    "N10": {"name": "West Covered Walkway Start", "x": 280, "y": 240, "type": "covered"},
-    "N11": {"name": "Pergola Walkway Mid", "x": 380, "y": 240, "type": "covered"},
-    "N12": {"name": "East Covered Walkway End", "x": 480, "y": 240, "type": "covered"},
+    # Connecting Covered Walkway (Rain Arcades)
+    "N10": {"name": "Covered Inter-Block Arcade West", "x": 280, "y": 240, "type": "covered"},
+    "N11": {"name": "Pergola Walkway (ASIET Central)", "x": 380, "y": 240, "type": "covered"},
+    "N12": {"name": "Covered Inter-Block Arcade East", "x": 480, "y": 240, "type": "covered"},
 
-    # Academic Block B & Seminar Halls
-    "N13": {"name": "Block B Main Foyer", "x": 520, "y": 220, "type": "building"},
-    "N14": {"name": "Grand Seminar Hall Steps", "x": 560, "y": 160, "type": "stairs"},
-    "N15": {"name": "Grand Seminar Hall Accessible Lift", "x": 500, "y": 150, "type": "lift"},
-    "N16": {"name": "APJ Abdul Kalam Auditorium", "x": 540, "y": 90, "type": "building"},
+    # Shankara Administrative Block & Central Auditorium
+    "N13": {"name": "Shankara Block Main Foyer & Admin", "x": 520, "y": 220, "type": "building"},
+    "N14": {"name": "Auditorium Grand Marble Steps", "x": 560, "y": 160, "type": "stairs"},
+    "N15": {"name": "Auditorium Accessible Ramp & Lift", "x": 500, "y": 150, "type": "lift"},
+    "N16": {"name": "Adi Shankara Central Auditorium", "x": 540, "y": 90, "type": "building"},
 
-    # Student Amenities
-    "N17": {"name": "Canteen Plaza", "x": 420, "y": 420, "type": "outdoor"},
-    "N18": {"name": "Canteen Hall & Juice Bar", "x": 450, "y": 500, "type": "building"},
-    "N19": {"name": "Central Library Portico", "x": 620, "y": 380, "type": "building"},
-    "N20": {"name": "Library Steps", "x": 660, "y": 320, "type": "stairs"},
-    "N21": {"name": "Library Side Wheelchair Ramp", "x": 600, "y": 300, "type": "ramp"},
-    "N22": {"name": "Digital Reference Wing", "x": 640, "y": 240, "type": "building"},
+    # Student Amenities, Canteen & Library
+    "N17": {"name": "ASIET Canteen Plaza & Cafeteria", "x": 420, "y": 420, "type": "outdoor"},
+    "N18": {"name": "Main Dining Hall & Coffee Bar", "x": 450, "y": 500, "type": "building"},
+    "N19": {"name": "Central Library & Digital Knowledge Centre", "x": 620, "y": 380, "type": "building"},
+    "N20": {"name": "Library Portico Steps", "x": 660, "y": 320, "type": "stairs"},
+    "N21": {"name": "Library Accessible Ramp", "x": 600, "y": 300, "type": "ramp"},
+    "N22": {"name": "Digital Reference Wing & E-Learning Hub", "x": 640, "y": 240, "type": "building"},
     
-    # Innovation Hub & East Gate
-    "N23": {"name": "Maker Space Workshop", "x": 700, "y": 160, "type": "building"},
-    "N24": {"name": "Open-Air Amphitheatre", "x": 340, "y": 520, "type": "outdoor"},
-    "N25": {"name": "East Gate Footpath", "x": 750, "y": 360, "type": "entrance"},
+    # Innovation Hub, OAT & East Gate
+    "N23": {"name": "ASIET Fab Lab & IEDC Maker Space", "x": 700, "y": 160, "type": "building"},
+    "N24": {"name": "ASIET Open-Air Amphitheatre (OAT)", "x": 340, "y": 520, "type": "outdoor"},
+    "N25": {"name": "East Gate (Hostel & Sports Complex)", "x": 750, "y": 360, "type": "entrance"},
 }
 
 # (node_u, node_v, distance_meters, accessible_bool, covered_bool)

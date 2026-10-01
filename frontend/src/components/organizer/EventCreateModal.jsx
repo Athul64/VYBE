@@ -6,21 +6,66 @@ export const EventCreateModal = ({
   isOpen,
   onClose,
   venues = {},
-  onEventCreated
+  onEventCreated,
+  currentUser,
+  onOpenLogin
 }) => {
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Workshop');
   const [description, setDescription] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
   const [start, setStart] = useState('11:45');
   const [end, setEnd] = useState('12:45');
   const [venueId, setVenueId] = useState('V02'); // Ada Lovelace Hall
-  const [organizer, setOrganizer] = useState('Student Coding Guild');
+  const [organizer, setOrganizer] = useState(
+    currentUser ? `${currentUser.name} (${(currentUser.department || 'CSE').split(' ')[0]})` : 'Student Coding Guild'
+  );
   
   const [conflictError, setConflictError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [loading, setLoading] = useState(false);
 
   if (!isOpen) return null;
+
+  if (!currentUser) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-pencil/60 backdrop-blur-xs select-none">
+        <div className="relative w-full max-w-md bg-paper-bg border-[4px] border-pencil border-wobbly-md p-6 shadow-sketchLg text-center font-hand">
+          <div className="tape-strip !top-[-14px]" />
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 p-1.5 border-2 border-pencil border-wobbly bg-paper-muted hover:bg-marker-red hover:text-white transition-colors cursor-pointer"
+          >
+            <X className="w-5 h-5 stroke-[2.5]" />
+          </button>
+          <div className="w-12 h-12 mx-auto rounded-lg bg-paper-yellow border-2 border-pencil flex items-center justify-center mb-3 shadow-xs">
+            <Building2 className="w-6 h-6 text-marker-red" />
+          </div>
+          <h3 className="font-marker text-2xl text-pencil mb-2">
+            Student Login Required
+          </h3>
+          <p className="text-sm text-pencil/80 mb-5 leading-relaxed">
+            To propose a campus event at Adi Shankara Institute of Engineering & Technology, please sign in or register with your Student ID card first.
+          </p>
+          <div className="flex gap-2 justify-center">
+            <SketchButton variant="secondary" onClick={onClose} className="!py-1.5 !px-4">
+              Cancel
+            </SketchButton>
+            <SketchButton 
+              variant="primary" 
+              onClick={() => {
+                onClose();
+                if (onOpenLogin) onOpenLogin();
+              }} 
+              className="!py-1.5 !px-5"
+            >
+              Sign In / Register 🪪
+            </SketchButton>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,7 +84,9 @@ export const EventCreateModal = ({
           start,
           end,
           venue_id: venueId,
-          organizer
+          organizer: organizer || (currentUser?.name || "Student Organizer"),
+          submitted_by: currentUser?.student_id || "CS2024-MEERA",
+          image_url: imageUrl || "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1000&q=80"
         })
       });
       const data = await resp.json();
@@ -51,7 +98,7 @@ export const EventCreateModal = ({
         if (onEventCreated) onEventCreated(data.event);
         setTimeout(() => {
           onClose();
-        }, 1500);
+        }, 2200);
       }
     } catch (err) {
       console.error("Event creation error:", err);
@@ -64,24 +111,7 @@ export const EventCreateModal = ({
     }
   };
 
-  // Preset triggers for quick judging demo
-  const loadDemoClashPreset = () => {
-    setTitle("Autonomous Agent Hackathon Kickoff");
-    setVenueId("V02"); // Ada Lovelace Hall
-    setStart("11:45");
-    setEnd("12:45"); // Clashes with EVT-01 (11:30 - 12:30 at V02)!
-    setCategory("Hackathon");
-    setConflictError(null);
-  };
 
-  const loadDemoFreePreset = () => {
-    setTitle("Game Dev Society Show & Tell");
-    setVenueId("V03"); // APJ Kalam Aud
-    setStart("09:00");
-    setEnd("10:30");
-    setCategory("Workshop");
-    setConflictError(null);
-  };
 
   const selectedVenue = venues[venueId];
 
@@ -111,24 +141,20 @@ export const EventCreateModal = ({
             Automated double-booking prevention & hall capacity validation.
           </p>
 
-          {/* Quick Demo Fill Buttons */}
-          <div className="flex flex-wrap items-center gap-2 mt-2">
-            <span className="text-xs font-hand font-bold text-pencil/70">Judge Presets:</span>
-            <button
-              type="button"
-              onClick={loadDemoClashPreset}
-              className="text-xs font-hand font-bold px-2 py-0.5 bg-marker-red/10 text-marker-red border border-marker-red border-wobbly hover:bg-marker-red hover:text-white cursor-pointer"
-            >
-              ⚡ Fill Double-Booking Clash Test
-            </button>
-            <button
-              type="button"
-              onClick={loadDemoFreePreset}
-              className="text-xs font-hand font-bold px-2 py-0.5 bg-[#e8f5e9] text-[#2e7d32] border border-[#2e7d32] border-wobbly hover:bg-[#2e7d32] hover:text-white cursor-pointer"
-            >
-              ✅ Fill Clean Slot Test
-            </button>
+
+        </div>
+
+        {/* Campus Verification Policy Notice */}
+        <div className="mb-4 p-3 bg-paper-yellow/70 border-2 border-pencil rounded-lg text-xs font-hand shadow-xs">
+          <div className="flex items-center gap-1.5 font-bold text-pencil mb-0.5">
+            <Sparkles className="w-3.5 h-3.5 text-marker-red fill-marker-red" />
+            <span>Campus Safety & Verification Rule:</span>
           </div>
+          <p className="text-pencil/80 leading-tight">
+            {currentUser?.role === 'admin'
+              ? '👑 Signed in as Campus Dean: Your event will be instantly verified and showcased live on the discover feed.'
+              : '🛡️ Submitted by student: This event will be queued for Admin Verification by the Dean of Student Affairs before being showcased to all campus students.'}
+          </p>
         </div>
 
         {/* Conflict Warning Box */}
@@ -291,12 +317,29 @@ export const EventCreateModal = ({
             />
           </div>
 
+          <div>
+            <label className="block text-xs uppercase tracking-wider text-pencil/70 mb-1">
+              Event Poster / Image URL (Optional)
+            </label>
+            <input
+              type="url"
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              placeholder="https://images.unsplash.com/... or leave blank for auto-poster"
+              className="w-full text-sm font-hand border-2 border-pencil border-wobbly px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-marker-blue"
+            />
+          </div>
+
           <div className="pt-3 border-t-2 border-dashed border-pencil/20 flex items-center justify-end gap-2">
             <SketchButton variant="secondary" onClick={onClose} className="!py-1.5 !px-4">
               Cancel
             </SketchButton>
             <SketchButton variant="primary" type="submit" disabled={loading} className="!py-1.5 !px-5">
-              {loading ? "Checking Hall Availability..." : "Publish Event 📌"}
+              {loading
+                ? "Checking Hall Availability..."
+                : currentUser?.role === 'admin'
+                ? "Direct Publish & Approve 👑"
+                : "Submit for Admin Approval 🛡️"}
             </SketchButton>
           </div>
         </form>

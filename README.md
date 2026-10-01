@@ -32,6 +32,10 @@ event-trail/
 │   └── requirements.txt
 ├── frontend/
 │   ├── src/
+│   │   ├── pages/               # Multi-Page Architecture
+│   │   │   ├── LandingPage.jsx  # Hero landing page & persona selector
+│   │   │   ├── EventsPage.jsx   # Event list showcase & campus map cockpit
+│   │   │   └── EventDetailPage.jsx # Rich event view with dedicated route & TTS
 │   │   ├── components/
 │   │   │   ├── common/          # SketchButton, SketchCard, StickyNote, DemoBadge
 │   │   │   ├── feed/            # EventCard, ClashBanner, FreeGapFinder
@@ -40,7 +44,7 @@ event-trail/
 │   │   │   └── student/         # PersonaSwitcher, QrPassModal
 │   │   ├── hooks/               # useSpeech (Browser Text-To-Speech)
 │   │   ├── styles/              # handDrawn.css (wobbly keyframes, tape, dot-grid)
-│   │   ├── App.jsx              # Responsive 2-column feed + wayfinding layout
+│   │   ├── App.jsx              # React Router setup & global modal triggers
 │   │   └── index.css
 │   ├── tailwind.config.js       # Hand-drawn wobbly radii & sketch shadow tokens
 │   └── package.json

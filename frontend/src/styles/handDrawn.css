@@ -1,55 +1,41 @@
 /* src/styles/handDrawn.css */
-@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Patrick+Hand&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@700&family=Patrick+Hand&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
 body {
   background-color: #fdfbf7;
   color: #2d2d2d;
-  background-image: radial-gradient(#e5e0d8 1.5px, transparent 1.5px);
-  background-size: 24px 24px; /* Notebook paper dot-grid */
-  font-family: 'Patrick Hand', cursive;
+  background-image: radial-gradient(#e5e0d8 1.2px, transparent 1.2px);
+  background-size: 22px 22px; /* Notebook paper dot-grid */
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Wobbly border utility classes */
+/* Crisp, natural sketchbook borders (no pinching or warped distortion) */
 .border-wobbly {
-  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  border-radius: 10px;
 }
 
 .border-wobbly-md {
-  border-radius: 20px 255px 20px 255px / 255px 20px 255px 20px;
+  border-radius: 14px;
 }
 
 .border-wobbly-pill {
-  border-radius: 255px 25px 225px 25px / 25px 225px 25px 255px;
+  border-radius: 9999px;
 }
 
 /* Authentic Paper Tape Decoration */
 .tape-strip {
   position: absolute;
-  top: -12px;
+  top: -10px;
   left: 50%;
-  transform: translateX(-50%) rotate(-1.5deg);
-  width: 90px;
-  height: 24px;
-  background-color: rgba(229, 224, 216, 0.75);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-  border-left: 2px dashed rgba(45, 45, 45, 0.25);
-  border-right: 2px dashed rgba(45, 45, 45, 0.25);
-  pointer-events: none;
-  z-index: 20;
-}
-
-.tape-corner {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  width: 60px;
-  height: 20px;
-  transform: rotate(35deg);
+  transform: translateX(-50%) rotate(-1deg);
+  width: 70px;
+  height: 18px;
   background-color: rgba(229, 224, 216, 0.85);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border-left: 2px dashed rgba(45, 45, 45, 0.25);
-  border-right: 2px dashed rgba(45, 45, 45, 0.25);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  border-left: 2px dashed rgba(45, 45, 45, 0.3);
+  border-right: 2px dashed rgba(45, 45, 45, 0.3);
   pointer-events: none;
   z-index: 20;
 }
@@ -57,22 +43,22 @@ body {
 /* Red Thumbtack Pin */
 .thumbtack {
   position: absolute;
-  top: -10px;
+  top: -8px;
   left: 50%;
   transform: translateX(-50%);
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   background-color: #ff4d4d;
   border: 2px solid #2d2d2d;
   border-radius: 50%;
-  box-shadow: 2px 2px 0px #2d2d2d;
+  box-shadow: 1.5px 1.5px 0px #2d2d2d;
   z-index: 20;
 }
 .thumbtack::after {
   content: '';
   position: absolute;
-  top: 3px;
-  left: 4px;
+  top: 2px;
+  left: 3px;
   width: 4px;
   height: 4px;
   background: #ffffff;
@@ -85,41 +71,24 @@ body {
 
 /* Sticky Note Shadow & Curl */
 .sticky-curl {
-  box-shadow: 5px 5px 7px rgba(45, 45, 45, 0.15), 4px 4px 0px #2d2d2d;
-  transform: rotate(-1deg);
+  box-shadow: 3px 3px 0px #2d2d2d;
   transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 .sticky-curl:hover {
-  transform: rotate(0deg) scale(1.01);
-  box-shadow: 7px 7px 12px rgba(45, 45, 45, 0.2), 6px 6px 0px #2d2d2d;
+  transform: translateY(-1px);
+  box-shadow: 4px 4px 0px #2d2d2d;
 }
 
-/* Red pen strikethrough / underline scribble */
-.red-scribble-underline {
-  background-image: linear-gradient(120deg, transparent 0%, rgba(255, 77, 77, 0.3) 100%);
-  border-bottom: 2px solid #ff4d4d;
-}
-
-/* Notebook ruled line */
-.ruled-lines {
-  background-image: repeating-linear-gradient(
-    transparent,
-    transparent 27px,
-    #e5e0d8 28px
-  );
-  line-height: 28px;
-}
-
-/* Custom scrollbars with hand-drawn aesthetic */
+/* Custom scrollbars */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: #fdfbf7;
-  border-left: 2px solid #e5e0d8;
+  border-left: 1px solid #e5e0d8;
 }
 ::-webkit-scrollbar-thumb {
   background: #2d2d2d;
-  border-radius: 4px;
+  border-radius: 3px;
 }

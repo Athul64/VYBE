@@ -1,47 +1,99 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  Sparkles, Compass, Calendar, PlusCircle, LayoutDashboard, 
-  MapPin, CheckCircle, RefreshCcw, HelpCircle, Footprints, AlertTriangle 
-} from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 import { DemoBadge } from './components/common/DemoBadge';
-import { SketchButton } from './components/common/SketchButton';
-import { StickyNote } from './components/common/StickyNote';
+import { LandingPage } from './pages/LandingPage';
+import { EventsPage } from './pages/EventsPage';
+import { EventDetailPage } from './pages/EventDetailPage';
 
-import { EventCard } from './components/feed/EventCard';
-import { ClashBanner } from './components/feed/ClashBanner';
-import { FreeGapFinder } from './components/feed/FreeGapFinder';
-
-import { CampusMapSvg } from './components/map/CampusMapSvg';
-import { RouteControls } from './components/map/RouteControls';
-import { StepDirections } from './components/map/StepDirections';
-
-import { PersonaSwitcher } from './components/student/PersonaSwitcher';
 import { QrPassModal } from './components/student/QrPassModal';
-
+import { FreeGapFinder } from './components/feed/FreeGapFinder';
 import { EventCreateModal } from './components/organizer/EventCreateModal';
 import { AdminDashboard } from './components/organizer/AdminDashboard';
+import { LoginModal } from './components/auth/LoginModal';
 
 import { useSpeech } from './hooks/useSpeech';
 
 const API_BASE = 'http://localhost:8000/api';
 
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, info) {
+    console.error("ErrorBoundary caught:", error, info);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-paper-bg p-8 flex items-center justify-center font-sans">
+          <div className="max-w-md bg-white border-2 border-pencil rounded-xl p-6 shadow-sketch relative">
+            <div className="thumbtack !top-[-10px]" />
+            <h2 className="font-marker text-2xl text-marker-red mb-2">Notebook Page Crinkled!</h2>
+            <p className="text-sm text-pencil/80 mb-4">
+              Something went slightly wobbly rendering this page:
+            </p>
+            <pre className="text-xs bg-paper-bg p-3 border border-pencil rounded mb-4 overflow-auto text-pencil/70">
+              {this.state.error?.message || 'Unknown render error'}
+            </pre>
+            <button
+              onClick={() => {
+                this.setState({ hasError: false });
+                window.location.href = '/';
+              }}
+              className="px-4 py-2 bg-paper-yellow hover:bg-pencil hover:text-white border-2 border-pencil rounded-lg font-bold text-sm shadow-[2px_2px_0px_#2d2d2d] transition-all cursor-pointer"
+            >
+              Back to Home Desk
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export default function App() {
-  // Demo Personas & Active Persona
+  // Authentication & Session
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('vybe_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [pendingApprovalsCount, setPendingApprovalsCount] = useState(0);
+
+  // Personas
   const [personas, setPersonas] = useState({});
-  const [activePersonaKey, setActivePersonaKey] = useState('meera');
+  const [activePersonaKey, setActivePersonaKey] = useState(() => {
+    try {
+      const saved = localStorage.getItem('vybe_user');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return parsed.persona_key || 'admin';
+      }
+    } catch {}
+    return 'admin';
+  });
 
   // Campus Data
   const [campusNodes, setCampusNodes] = useState({});
   const [campusEdges, setCampusEdges] = useState([]);
   const [venues, setVenues] = useState({});
 
-  // Ranked Events Feed
+  // Events Feed
   const [events, setEvents] = useState([]);
   const [categoryFilter, setCategoryFilter] = useState('All');
-  const [rsvpdEventIds, setRsvpdEventIds] = useState(['EVT-01']);
+  const [rsvpdEventIds, setRsvpdEventIds] = useState([]);
 
-  // Navigation Route State
+  // Wayfinding State
   const [fromNode, setFromNode] = useState('N08');
   const [toNode, setToNode] = useState('N09');
   const [stepFree, setStepFree] = useState(false);
@@ -56,9 +108,8 @@ export default function App() {
   const [isFreeGapOpen, setIsFreeGapOpen] = useState(false);
   const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
-  const [showDemoGuide, setShowDemoGuide] = useState(true);
 
-  // Text-To-Speech hook
+  // TTS Voice Hook
   const { 
     isSupported: isSpeechSupported, 
     isSpeaking, 
@@ -67,18 +118,46 @@ export default function App() {
     stop: stopSpeech 
   } = useSpeech();
 
-  // Initial Data Fetch
+  // Load Initial Campus & Personas & Pending Count
   useEffect(() => {
     fetchCampusData();
     fetchPersonas();
+    fetchPendingCount();
   }, []);
+
+  const fetchPendingCount = async () => {
+    try {
+      const resp = await fetch(`${API_BASE}/admin/pending-events`);
+      if (resp.ok) {
+        const data = await resp.json();
+        setPendingApprovalsCount(Array.isArray(data) ? data.length : 0);
+      }
+    } catch (err) {
+      console.error("Pending count error:", err);
+    }
+  };
+
+  const handleLoginSuccess = (userData) => {
+    setCurrentUser(userData);
+    localStorage.setItem('vybe_user', JSON.stringify(userData));
+    if (userData.persona_key && userData.persona_key !== activePersonaKey) {
+      setActivePersonaKey(userData.persona_key);
+    }
+    fetchPendingCount();
+    fetchEvents(userData.persona_key || activePersonaKey);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('vybe_user');
+    setCurrentUser(null);
+  };
 
   // Fetch Ranked Events when Persona changes
   useEffect(() => {
     fetchEvents(activePersonaKey);
   }, [activePersonaKey]);
 
-  // Sync navigation default origin to persona's location and mobility needs
+  // Sync navigation origin to active persona
   useEffect(() => {
     if (personas[activePersonaKey]) {
       const p = personas[activePersonaKey];
@@ -87,7 +166,7 @@ export default function App() {
     }
   }, [activePersonaKey, personas]);
 
-  // Auto-calculate initial route when fromNode and toNode are set
+  // Auto-calculate route
   useEffect(() => {
     if (fromNode && toNode) {
       calculateRoute(fromNode, toNode, stepFree, rainMode);
@@ -147,46 +226,37 @@ export default function App() {
     }
   };
 
-  // RSVP Handler (With Clash Detection PRD FR-3 & FR-4)
+  // RSVP Handler (PRD FR-3 & FR-4 Clash Check)
   const handleRsvp = async (event) => {
+    if (!currentUser) {
+      setIsLoginOpen(true);
+      return;
+    }
+
     try {
       const resp = await fetch(`${API_BASE}/rsvp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          student_id: activePersonaKey,
+          student_id: currentUser.persona_key || activePersonaKey,
           event_id: event.id
         })
       });
       const data = await resp.json();
 
       if (data.clash_check && data.clash_check.is_clash) {
-        // Schedule conflict detected! Show red banner with alternatives
         setActiveClash(data.clash_check);
       } else {
-        // Conflict-free RSVP: mark going and show pass
         setActiveClash(null);
         if (!rsvpdEventIds.includes(event.id)) {
           setRsvpdEventIds(prev => [...prev, event.id]);
         }
-        // Refresh event feed to update RSVP counter
         fetchEvents(activePersonaKey);
         setSelectedEventForPass(event);
         setIsPassModalOpen(true);
       }
     } catch (err) {
       console.error("RSVP error:", err);
-    }
-  };
-
-  // Direct Route To Venue
-  const handleNavigateToNode = (targetNodeId) => {
-    setToNode(targetNodeId);
-    calculateRoute(fromNode, targetNodeId, stepFree, rainMode);
-    // Smooth scroll to map section on mobile
-    const mapEl = document.getElementById('campus-map-section');
-    if (mapEl) {
-      mapEl.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
@@ -199,7 +269,8 @@ export default function App() {
     try {
       await fetch(`${API_BASE}/reset-demo`, { method: 'POST' });
       fetchEvents(activePersonaKey);
-      setRsvpdEventIds(['EVT-01']);
+      fetchPendingCount();
+      setRsvpdEventIds([]);
       setActiveClash(null);
       if (personas[activePersonaKey]) {
         setFromNode(personas[activePersonaKey].current_location_node);
@@ -212,329 +283,169 @@ export default function App() {
     }
   };
 
-  // Filtered Events
-  const filteredEvents = events.filter(item => {
-    if (categoryFilter === 'All') return true;
-    return item.event.category.toLowerCase() === categoryFilter.toLowerCase();
-  });
-
   const categories = ['All', 'Workshop', 'Hackathon', 'Competition', 'Design', 'Cultural'];
 
   return (
-    <div className="min-h-screen text-pencil pb-16 font-hand selection:bg-paper-yellow selection:text-pencil">
-      {/* Honesty Demo Data Badge Pinned to Viewport */}
+    <BrowserRouter>
+      {/* Honesty Demo Data Badge Pinned in Viewport */}
       <DemoBadge onResetDemo={handleResetDemo} />
 
-      {/* Main Header / Sketchbook Cover Banner */}
-      <header className="pt-6 pb-4 px-4 sm:px-8 border-b-[3px] border-pencil bg-paper-bg relative">
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="w-4 h-4 rounded-full bg-marker-red border-2 border-pencil inline-block"></span>
-              <span className="font-hand font-bold text-xs uppercase tracking-widest text-pencil/70">
-                CAMPUS WAYFINDING & RELEVANCE ENGINE
-              </span>
-            </div>
-            <h1 className="font-marker text-4xl sm:text-5xl text-pencil tracking-tight">
-              VYBE ⚡
-            </h1>
-            <p className="font-hand text-lg sm:text-xl text-pencil/80 italic mt-0.5">
-              "Don't just find the event. Get to it."
-            </p>
-          </div>
-
-          {/* Navigation Action Buttons */}
-          <div className="flex flex-wrap items-center gap-2">
-            <SketchButton
-              variant="postit"
-              onClick={() => setIsFreeGapOpen(true)}
-              className="!py-2 !px-3.5 text-base flex items-center gap-1.5"
-            >
-              <Sparkles className="w-4 h-4 text-marker-red fill-marker-red" />
-              What fits my free hour?
-            </SketchButton>
-
-            <SketchButton
-              variant="primary"
-              onClick={() => setIsCreateEventOpen(true)}
-              className="!py-2 !px-3.5 text-base flex items-center gap-1.5"
-            >
-              <PlusCircle className="w-4 h-4" />
-              Post Event (Organizer)
-            </SketchButton>
-
-            <SketchButton
-              variant="secondary"
-              onClick={() => setIsAdminOpen(true)}
-              className="!py-2 !px-3.5 text-base flex items-center gap-1.5"
-            >
-              <LayoutDashboard className="w-4 h-4" />
-              Admin Ledger
-            </SketchButton>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-8 pt-6">
-        {/* Judging Demo Walkthrough Sticky Note Guide */}
-        {showDemoGuide && (
-          <div className="relative mb-6 p-4 bg-paper-yellow/90 border-[3px] border-pencil border-wobbly sticky-curl">
-            <div className="thumbtack" />
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <h4 className="font-marker text-xl text-pencil flex items-center gap-1.5">
-                  ⚡ 3-Minute Hackathon Judging Walkthrough Script:
-                </h4>
-                <p className="font-hand text-sm text-pencil/80 mb-2">
-                  Follow the pre-seeded steps from the PRD to verify the entire student journey without breaking:
-                </p>
-                <div className="flex flex-wrap gap-2 text-xs font-hand">
-                  <button
-                    onClick={() => {
-                      setActivePersonaKey('meera');
-                      fetchEvents('meera');
-                    }}
-                    className="px-2.5 py-1 bg-white border border-pencil border-wobbly font-bold hover:bg-paper-muted cursor-pointer"
-                  >
-                    1. Load Meera (CS 2nd Yr) 💻
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      const devfest = events.find(e => e.event.id === 'EVT-02');
-                      if (devfest) handleRsvp(devfest.event);
-                    }}
-                    className="px-2.5 py-1 bg-marker-red text-white border border-pencil border-wobbly font-bold hover:opacity-90 cursor-pointer"
-                  >
-                    2. RSVP 1:30 PM DevFest (Clashes with Discrete Math!) 🚨
-                  </button>
-
-                  <button
-                    onClick={() => setIsFreeGapOpen(true)}
-                    className="px-2.5 py-1 bg-paper-yellow border border-pencil border-wobbly font-bold hover:bg-white cursor-pointer"
-                  >
-                    3. Check Free Gap (11:00 – 13:00) 💡
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setActivePersonaKey('arjun');
-                      fetchEvents('arjun');
-                      setFromNode('N05');
-                      setToNode('N08');
-                      setStepFree(true);
-                      calculateRoute('N05', 'N08', true, false);
-                    }}
-                    className="px-2.5 py-1 bg-marker-blue text-white border border-pencil border-wobbly font-bold hover:opacity-90 cursor-pointer"
-                  >
-                    4. Switch to Arjun (Step-Free South Ramp N07) ♿
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setFromNode('N03');
-                      setToNode('N19');
-                      setRainMode(true);
-                      calculateRoute('N03', 'N19', false, true);
-                    }}
-                    className="px-2.5 py-1 bg-[#2d5da1] text-white border border-pencil border-wobbly font-bold hover:opacity-90 cursor-pointer"
-                  >
-                    5. Rain Mode (Covered Walkway N11-N12-N19) ☂️
-                  </button>
-
-                  <button
-                    onClick={() => setIsCreateEventOpen(true)}
-                    className="px-2.5 py-1 bg-white border border-pencil border-wobbly font-bold hover:bg-pencil hover:text-white cursor-pointer"
-                  >
-                    6. Organizer Double-Booking Test 📋
-                  </button>
-                </div>
-              </div>
-
-              <button
-                onClick={() => setShowDemoGuide(false)}
-                className="text-xs font-hand text-pencil/60 underline hover:text-pencil cursor-pointer"
-              >
-                Hide Guide
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Persona Dossier Section */}
-        <section className="mb-6">
-          <PersonaSwitcher
-            personas={personas}
-            activePersonaKey={activePersonaKey}
-            onSelectPersona={(key) => setActivePersonaKey(key)}
-            timetable={personas[activePersonaKey]?.timetable_today || []}
-          />
-        </section>
-
-        {/* Two-Column Responsive Layout: Feed on Left, Interactive Map on Right */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          
-          {/* LEFT COLUMN: Ranked Event Feed (7 Cols) */}
-          <div className="lg:col-span-7 space-y-4">
-            
-            {/* Clash Banner (Displays when conflict occurs) */}
-            {activeClash && (
-              <ClashBanner
-                clashData={activeClash}
-                onClose={() => setActiveClash(null)}
-                onSelectAlternative={(altEvent) => {
-                  setActiveClash(null);
-                  handleRsvp(altEvent);
-                }}
-                onOpenFreeGapFinder={() => {
-                  setActiveClash(null);
-                  setIsFreeGapOpen(true);
-                }}
-              />
-            )}
-
-            {/* Category Filter Chips */}
-            <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b-2 border-dashed border-pencil/20">
-              <div className="flex flex-wrap gap-1.5">
-                {categories.map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => setCategoryFilter(cat)}
-                    className={`px-3 py-1 text-sm font-hand font-bold border-2 border-pencil border-wobbly transition-all cursor-pointer ${
-                      categoryFilter === cat
-                        ? 'bg-pencil text-white shadow-none translate-x-[1px] translate-y-[1px]'
-                        : 'bg-white hover:bg-paper-yellow text-pencil'
-                    }`}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
-
-              <span className="text-xs font-hand text-pencil/70">
-                Sorted by PRD Multi-Factor Relevance
-              </span>
-            </div>
-
-            {/* Event Cards List */}
-            {filteredEvents.length === 0 ? (
-              <div className="p-8 text-center bg-white border-[3px] border-pencil border-wobbly shadow-sketch">
-                <p className="font-hand text-xl text-pencil/70">
-                  No events found in category "{categoryFilter}".
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {filteredEvents.map((rankedItem, idx) => (
-                  <EventCard
-                    key={rankedItem.event.id}
-                    rankedItem={rankedItem}
-                    rotation={idx % 2 === 0 ? -0.5 : 0.5}
-                    isRsvpd={rsvpdEventIds.includes(rankedItem.event.id)}
-                    onRsvp={handleRsvp}
-                    onNavigate={handleNavigateToNode}
-                    onViewPass={handleOpenPass}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* RIGHT COLUMN: Hand-Drawn SVG Map & Navigation (5 Cols) */}
-          <div id="campus-map-section" className="lg:col-span-5 space-y-4 lg:sticky lg:top-4">
-            
-            {/* Campus SVG Map */}
-            <CampusMapSvg
-              nodes={campusNodes}
-              edges={campusEdges}
-              activeRoute={activeRoute}
-              stepFree={stepFree}
-              rainMode={rainMode}
-              selectedNode={selectedNode}
-              currentLocationNode={fromNode}
-              targetEventNode={toNode}
-              onSelectNode={(nodeId) => {
-                setSelectedNode(nodeId);
-                setToNode(nodeId);
-              }}
+      <ErrorBoundary>
+        <Routes>
+        {/* 1. Hero Landing Page */}
+        <Route 
+          path="/" 
+          element={
+            <LandingPage
+              personas={personas}
+              activePersonaKey={activePersonaKey}
+              onSelectPersona={(k) => setActivePersonaKey(k)}
+              onResetDemo={handleResetDemo}
+              currentUser={currentUser}
+              onOpenLogin={() => setIsLoginOpen(true)}
+              onLogout={handleLogout}
+              pendingApprovalsCount={pendingApprovalsCount}
+              onOpenAdmin={() => setIsAdminOpen(true)}
             />
+          } 
+        />
 
-            {/* Route Controls */}
-            <RouteControls
-              nodes={campusNodes}
+        {/* 2. Events Showcase List Page */}
+        <Route 
+          path="/events" 
+          element={
+            <EventsPage
+              personas={personas}
+              activePersonaKey={activePersonaKey}
+              setActivePersonaKey={setActivePersonaKey}
+              events={events}
+              categoryFilter={categoryFilter}
+              setCategoryFilter={setCategoryFilter}
+              categories={categories}
+              rsvpdEventIds={rsvpdEventIds}
+              onRsvp={handleRsvp}
+              onOpenPass={handleOpenPass}
+              onResetDemo={handleResetDemo}
+              activeClash={activeClash}
+              setActiveClash={setActiveClash}
+              onOpenFreeGap={() => setIsFreeGapOpen(true)}
+              onOpenCreateEvent={() => setIsCreateEventOpen(true)}
+              onOpenAdmin={() => setIsAdminOpen(true)}
+              currentUser={currentUser}
+              onOpenLogin={() => setIsLoginOpen(true)}
+              onLogout={handleLogout}
+              pendingApprovalsCount={pendingApprovalsCount}
+              campusNodes={campusNodes}
+              campusEdges={campusEdges}
               fromNode={fromNode}
+              setFromNode={setFromNode}
               toNode={toNode}
+              setToNode={setToNode}
               stepFree={stepFree}
+              setStepFree={setStepFree}
               rainMode={rainMode}
-              onChangeFrom={(val) => setFromNode(val)}
-              onChangeTo={(val) => setToNode(val)}
-              onToggleStepFree={() => setStepFree(!stepFree)}
-              onToggleRainMode={() => setRainMode(!rainMode)}
-              onFindRoute={() => calculateRoute(fromNode, toNode, stepFree, rainMode)}
-              onSwapPoints={() => {
-                const temp = fromNode;
-                setFromNode(toNode);
-                setToNode(temp);
-              }}
-            />
-
-            {/* Turn-by-Turn Step Directions & TTS */}
-            <StepDirections
-              route={activeRoute}
+              setRainMode={setRainMode}
+              activeRoute={activeRoute}
+              calculateRoute={calculateRoute}
+              selectedNode={selectedNode}
+              setSelectedNode={setSelectedNode}
+              isSpeechSupported={isSpeechSupported}
               isSpeaking={isSpeaking}
               currentStepIndex={currentStepIndex}
-              onSpeakAll={speakSteps}
-              onStopSpeak={stopSpeech}
-              isSpeechSupported={isSpeechSupported}
+              speakSteps={speakSteps}
+              stopSpeech={stopSpeech}
             />
-          </div>
+          } 
+        />
 
-        </div>
-      </main>
+        {/* 3. Event Detail Page */}
+        <Route 
+          path="/events/:eventId" 
+          element={
+            <EventDetailPage
+              events={events}
+              personas={personas}
+              activePersonaKey={activePersonaKey}
+              rsvpdEventIds={rsvpdEventIds}
+              onRsvp={handleRsvp}
+              onOpenPass={handleOpenPass}
+              campusNodes={campusNodes}
+              campusEdges={campusEdges}
+              venues={venues}
+              onOpenFreeGap={() => setIsFreeGapOpen(true)}
+              currentUser={currentUser}
+              onOpenLogin={() => setIsLoginOpen(true)}
+            />
+          } 
+        />
 
-      {/* Modals & Slide-ins */}
+        {/* Fallback to Hero Landing */}
+        <Route 
+          path="*" 
+          element={
+            <LandingPage
+              personas={personas}
+              activePersonaKey={activePersonaKey}
+              onSelectPersona={(k) => setActivePersonaKey(k)}
+              onResetDemo={handleResetDemo}
+              currentUser={currentUser}
+              onOpenLogin={() => setIsLoginOpen(true)}
+              onLogout={handleLogout}
+              pendingApprovalsCount={pendingApprovalsCount}
+              onOpenAdmin={() => setIsAdminOpen(true)}
+            />
+          } 
+        />
+      </Routes>
+      </ErrorBoundary>
+
+      {/* Global Modals */}
+      <LoginModal
+        isOpen={isLoginOpen}
+        onClose={() => setIsLoginOpen(false)}
+        onLoginSuccess={handleLoginSuccess}
+        currentUser={currentUser}
+      />
+
       <QrPassModal
         event={selectedEventForPass}
-        student={personas[activePersonaKey]}
+        student={currentUser || personas[activePersonaKey] || { name: "Student", student_id: "STUDENT", department: "ASIET" }}
         isOpen={isPassModalOpen}
         onClose={() => setIsPassModalOpen(false)}
-        onCheckInSuccess={(eventId) => {
-          fetchEvents(activePersonaKey);
-        }}
+        onCheckInSuccess={() => fetchEvents(activePersonaKey)}
       />
 
       <FreeGapFinder
         isOpen={isFreeGapOpen}
         onClose={() => setIsFreeGapOpen(false)}
-        activePersonaKey={activePersonaKey}
+        activePersonaKey={currentUser?.student_id || activePersonaKey}
         onRsvp={handleRsvp}
-        onNavigate={handleNavigateToNode}
+        onNavigate={(nodeId) => {
+          setToNode(nodeId);
+          calculateRoute(fromNode, nodeId, stepFree, rainMode);
+        }}
       />
 
       <EventCreateModal
         isOpen={isCreateEventOpen}
         onClose={() => setIsCreateEventOpen(false)}
         venues={venues}
-        onEventCreated={(newEvent) => {
+        currentUser={currentUser}
+        onOpenLogin={() => setIsLoginOpen(true)}
+        onEventCreated={() => {
           fetchEvents(activePersonaKey);
+          fetchPendingCount();
         }}
       />
 
       <AdminDashboard
         isOpen={isAdminOpen}
         onClose={() => setIsAdminOpen(false)}
+        onEventApproved={() => {
+          fetchEvents(activePersonaKey);
+          fetchPendingCount();
+        }}
       />
-
-      {/* Hand-drawn Notebook Footer */}
-      <footer className="mt-16 text-center text-xs font-hand text-pencil/60 border-t-2 border-dashed border-pencil/20 pt-6">
-        <p>
-          VYBE — Built for College Hackathon (12-hour build). Hand-Drawn Sketchbook Design System.
-        </p>
-        <p className="mt-1">
-          Dijkstra Routing Engine on NetworkX • 25-Node Architectural Zone • Zero SaaS Corporate Clutter.
-        </p>
-      </footer>
-    </div>
+    </BrowserRouter>
   );
 }

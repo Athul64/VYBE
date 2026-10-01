@@ -16,18 +16,19 @@ export default {
         },
       },
       fontFamily: {
+        sans: ["Plus Jakarta Sans", "system-ui", "-apple-system", "sans-serif"],
         marker: ["Kalam", "cursive"],      // Headings (wght 700)
-        hand: ["Patrick Hand", "cursive"], // Body text & labels (wght 400)
+        hand: ["Patrick Hand", "cursive"], // Handwritten annotations / quotes
       },
       boxShadow: {
-        sketch: "4px 4px 0px 0px #2d2d2d",
-        sketchLg: "8px 8px 0px 0px #2d2d2d",
+        sketch: "3px 3px 0px 0px #2d2d2d",
+        sketchLg: "5px 5px 0px 0px #2d2d2d",
         sketchHover: "2px 2px 0px 0px #2d2d2d",
       },
       borderRadius: {
-        wobbly: "255px 15px 225px 15px / 15px 225px 15px 255px",
-        wobblyMd: "20px 255px 20px 255px / 255px 20px 255px 20px",
-        wobblyPill: "255px 25px 225px 25px / 25px 225px 25px 255px",
+        wobbly: "10px",
+        wobblyMd: "14px",
+        wobblyPill: "9999px",
       },
     },
   },

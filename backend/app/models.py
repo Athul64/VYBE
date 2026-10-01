@@ -36,6 +36,10 @@ class Event(BaseModel):
     rsvp_count: int = 0
     checked_in_count: int = 0
     tags: List[str] = []
+    status: str = "approved"  # "approved" | "pending" | "rejected"
+    submitted_by: Optional[str] = None
+    admin_notes: Optional[str] = None
+    image_url: Optional[str] = None
 
 class EventCreateRequest(BaseModel):
     title: str
@@ -45,6 +49,35 @@ class EventCreateRequest(BaseModel):
     end: str    # HH:MM
     venue_id: str
     organizer: str
+    submitted_by: Optional[str] = None
+    image_url: Optional[str] = None
+
+class LoginRequest(BaseModel):
+    student_id: str
+    password: str
+
+class RegisterRequest(BaseModel):
+    student_id: str
+    password: str
+    name: str
+    department: Optional[str] = "Computer Science & Engineering"
+    role: Optional[str] = "student"  # "student" | "admin"
+    needs_step_free: Optional[bool] = False
+    current_location_node: Optional[str] = "N01"
+
+class LoginResponse(BaseModel):
+    success: bool
+    student_id: str
+    name: str
+    role: str  # "student" | "admin"
+    persona_key: str
+    department: str
+    token: str
+
+class EventModerateRequest(BaseModel):
+    event_id: str
+    action: str  # "approve" | "reject"
+    admin_notes: Optional[str] = None
 
 class RSVPRequest(BaseModel):
     student_id: str
