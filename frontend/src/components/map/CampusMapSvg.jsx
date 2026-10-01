@@ -1,6 +1,67 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
+const DEFAULT_NODES = {
+  "N01": { "name": "ASIET Main Arch Gate (Kalady)", "x": 100, "y": 550, "type": "entrance" },
+  "N02": { "name": "Main Security Checkpost", "x": 160, "y": 500, "type": "outdoor" },
+  "N03": { "name": "Central Quad & Saraswathi Statue", "x": 300, "y": 420, "type": "outdoor" },
+  "N04": { "name": "Gulmohar Courtyard", "x": 240, "y": 340, "type": "outdoor" },
+  "N05": { "name": "Aryabhata Block Foyer", "x": 180, "y": 240, "type": "building" },
+  "N06": { "name": "Aryabhata West Stairs", "x": 140, "y": 180, "type": "stairs" },
+  "N07": { "name": "Aryabhata Accessible Ramp", "x": 220, "y": 200, "type": "ramp" },
+  "N08": { "name": "Turing Advanced Computing Lab", "x": 160, "y": 120, "type": "building" },
+  "N09": { "name": "Aryabhata Seminar Hall", "x": 240, "y": 120, "type": "building" },
+  "N10": { "name": "Covered Arcade West", "x": 280, "y": 240, "type": "covered" },
+  "N11": { "name": "Pergola Walkway (Central)", "x": 380, "y": 240, "type": "covered" },
+  "N12": { "name": "Covered Arcade East", "x": 480, "y": 240, "type": "covered" },
+  "N13": { "name": "Shankara Main Foyer & Admin", "x": 520, "y": 220, "type": "building" },
+  "N14": { "name": "Auditorium Grand Steps", "x": 560, "y": 160, "type": "stairs" },
+  "N15": { "name": "Auditorium Ramp & Lift", "x": 500, "y": 150, "type": "lift" },
+  "N16": { "name": "Central Auditorium", "x": 540, "y": 90, "type": "building" },
+  "N17": { "name": "ASIET Canteen Plaza", "x": 420, "y": 420, "type": "outdoor" },
+  "N18": { "name": "Main Dining Hall", "x": 450, "y": 500, "type": "building" },
+  "N19": { "name": "Central Library Hub", "x": 620, "y": 380, "type": "building" },
+  "N20": { "name": "Library Portico Steps", "x": 660, "y": 320, "type": "stairs" },
+  "N21": { "name": "Library Accessible Ramp", "x": 600, "y": 300, "type": "ramp" },
+  "N22": { "name": "Digital Reference Wing", "x": 640, "y": 240, "type": "building" },
+  "N23": { "name": "ASIET Fab Lab & IEDC", "x": 700, "y": 160, "type": "building" },
+  "N24": { "name": "Open-Air Amphitheatre (OAT)", "x": 340, "y": 520, "type": "outdoor" },
+  "N25": { "name": "East Gate (Hostels)", "x": 750, "y": 360, "type": "entrance" }
+};
+
+const DEFAULT_EDGES = [
+  ["N01", "N02", 70, true, false],
+  ["N02", "N03", 150, true, false],
+  ["N02", "N04", 170, true, false],
+  ["N04", "N05", 110, true, false],
+  ["N05", "N06", 60, false, true],
+  ["N05", "N07", 75, true, true],
+  ["N06", "N08", 65, false, true],
+  ["N07", "N08", 85, true, true],
+  ["N08", "N09", 80, true, true],
+  ["N05", "N10", 90, true, true],
+  ["N10", "N11", 100, true, true],
+  ["N11", "N12", 100, true, true],
+  ["N12", "N13", 50, true, true],
+  ["N03", "N11", 160, true, false],
+  ["N13", "N14", 70, false, true],
+  ["N13", "N15", 55, true, true],
+  ["N14", "N16", 70, false, true],
+  ["N15", "N16", 75, true, true],
+  ["N03", "N17", 120, true, false],
+  ["N17", "N18", 80, true, true],
+  ["N17", "N19", 190, true, false],
+  ["N12", "N19", 180, true, true],
+  ["N19", "N20", 65, false, false],
+  ["N19", "N21", 80, true, false],
+  ["N20", "N22", 80, false, true],
+  ["N21", "N22", 90, true, true],
+  ["N16", "N23", 160, true, false],
+  ["N22", "N23", 110, true, true],
+  ["N03", "N24", 110, true, false],
+  ["N19", "N25", 130, true, false]
+];
+
 export const CampusMapSvg = ({ 
   nodes = {}, 
   edges = [], 
@@ -11,16 +72,30 @@ export const CampusMapSvg = ({
   selectedNode = null,
   currentLocationNode = null,
   targetEventNode = null,
-  className = ""
+  className = "",
+  compact = false
 }) => {
+  const effectiveNodes = (nodes && Object.keys(nodes).length > 0) ? nodes : DEFAULT_NODES;
+  const effectiveEdges = (edges && edges.length > 0) ? edges : DEFAULT_EDGES;
+
+  // Default preview route if none supplied in compact mode
+  const effectiveRoute = activeRoute || (compact ? {
+    path_nodes: ["N08", "N05", "N10", "N11", "N12", "N13", "N15", "N16"],
+    total_distance_m: 540,
+    eta_minutes: 2
+  } : null);
+
+  const effectiveStartNode = currentLocationNode || (compact ? "N08" : null);
+  const effectiveTargetNode = targetEventNode || (compact ? "N16" : null);
+
   // Coordinate helper: viewbox is 0 0 850 600
   const getCoordinates = (nodeId) => {
-    const node = nodes[nodeId];
+    const node = effectiveNodes[nodeId];
     return node ? { x: node.x, y: node.y } : { x: 0, y: 0 };
   };
 
   // Convert active path nodes into an SVG path "M x y L x y..."
-  const routePathD = activeRoute?.path_nodes?.reduce((acc, curr, index) => {
+  const routePathD = effectiveRoute?.path_nodes?.reduce((acc, curr, index) => {
     const { x, y } = getCoordinates(curr);
     return index === 0 ? `M ${x} ${y}` : `${acc} L ${x} ${y}`;
   }, "") || "";
@@ -37,29 +112,33 @@ export const CampusMapSvg = ({
   ];
 
   return (
-    <div className={`relative w-full overflow-hidden border-2 border-pencil rounded-xl bg-paper-bg p-3 shadow-sketch select-none flex flex-col ${className}`}>
+    <div className={`relative w-full overflow-hidden select-none flex flex-col ${
+      compact ? className : `border-2 border-pencil rounded-xl bg-paper-bg p-3 shadow-sketch ${className}`
+    }`}>
       
-      {/* Map header */}
-      <div className="flex flex-wrap items-center justify-between gap-1 mb-2 pb-1.5 border-b border-pencil/20 shrink-0">
-        <div className="flex items-center gap-2">
-          <span className="font-marker text-lg text-pencil">Adi Shankara (ASIET) Kalady Campus Trail</span>
-          <span className="text-[11px] bg-paper-muted px-2 py-0.5 border border-pencil rounded font-semibold">Scale: 1:500</span>
+      {/* Map header - only in full view */}
+      {!compact && (
+        <div className="flex flex-wrap items-center justify-between gap-1 mb-2 pb-1.5 border-b border-pencil/20 shrink-0">
+          <div className="flex items-center gap-2">
+            <span className="font-marker text-lg text-pencil">Adi Shankara (ASIET) Kalady Campus Trail</span>
+            <span className="text-[11px] bg-paper-muted px-2 py-0.5 border border-pencil rounded font-semibold">Scale: 1:500</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2.5 text-xs font-medium text-pencil">
+            <span className="flex items-center gap-1">
+              <span className="inline-block w-4 h-0.5 border-t-2 border-dashed border-pencil/70"></span> Uncovered
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="inline-block w-4 h-1.5 bg-marker-blue rounded-sm"></span> Covered ☂️
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="inline-block w-2.5 h-2.5 rounded-full bg-[#2d5da1] border border-pencil"></span> Start
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="inline-block w-2.5 h-2.5 rounded-full bg-marker-red border border-pencil"></span> Destination
+            </span>
+          </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2.5 text-xs font-medium text-pencil">
-          <span className="flex items-center gap-1">
-            <span className="inline-block w-4 h-0.5 border-t-2 border-dashed border-pencil/70"></span> Uncovered
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="inline-block w-4 h-1.5 bg-marker-blue rounded-sm"></span> Covered ☂️
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="inline-block w-2.5 h-2.5 rounded-full bg-[#2d5da1] border border-pencil"></span> Start
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="inline-block w-2.5 h-2.5 rounded-full bg-marker-red border border-pencil"></span> Destination
-          </span>
-        </div>
-      </div>
+      )}
 
       <div className="flex-1 min-h-0 w-full flex items-center justify-center overflow-hidden">
         <svg viewBox="0 0 820 600" className="w-full h-full max-h-[420px] object-contain select-none bg-[#fdfbf7]">
@@ -135,13 +214,13 @@ export const CampusMapSvg = ({
           </text>
 
           {/* Edges */}
-          {edges.map(([u, v, dist, accessible, covered], idx) => {
+          {effectiveEdges.map(([u, v, dist, accessible, covered], idx) => {
             const p1 = getCoordinates(u);
             const p2 = getCoordinates(v);
-            const isRouteEdge = activeRoute?.path_nodes && 
-              activeRoute.path_nodes.some((n, i) => 
-                (n === u && activeRoute.path_nodes[i+1] === v) || 
-                (n === v && activeRoute.path_nodes[i+1] === u)
+            const isRouteEdge = effectiveRoute?.path_nodes && 
+              effectiveRoute.path_nodes.some((n, i) => 
+                (n === u && effectiveRoute.path_nodes[i+1] === v) || 
+                (n === v && effectiveRoute.path_nodes[i+1] === u)
               );
 
             return (
@@ -176,10 +255,10 @@ export const CampusMapSvg = ({
           )}
 
           {/* Nodes with High-Contrast Legible Labels */}
-          {Object.entries(nodes).map(([id, node]) => {
-            const isStart = activeRoute?.path_nodes?.[0] === id || currentLocationNode === id;
-            const isDestination = activeRoute?.path_nodes?.slice(-1)[0] === id || targetEventNode === id;
-            const isInRoute = activeRoute?.path_nodes?.includes(id);
+          {Object.entries(effectiveNodes).map(([id, node]) => {
+            const isStart = effectiveRoute?.path_nodes?.[0] === id || effectiveStartNode === id;
+            const isDestination = effectiveRoute?.path_nodes?.slice(-1)[0] === id || effectiveTargetNode === id;
+            const isInRoute = effectiveRoute?.path_nodes?.includes(id);
             const isSelected = selectedNode === id;
 
             let fillColor = "#ffffff";
@@ -226,23 +305,29 @@ export const CampusMapSvg = ({
                 />
 
                 {/* Clean, Razor-Sharp Readable Label with White Outline Halo */}
-                <text
-                  x="10"
-                  y="4"
-                  fontFamily="system-ui, -apple-system, sans-serif"
-                  fontSize={isDestination || isStart ? "13" : isSelected ? "12" : "11"}
-                  fontWeight={isDestination || isStart || isSelected ? "700" : "600"}
-                  fill={isDestination ? "#ff4d4d" : isStart ? "#2d5da1" : isInRoute ? "#2d2d2d" : "#4a4641"}
-                  className="pointer-events-none select-none"
-                  style={{
-                    paintOrder: "stroke fill",
-                    stroke: "#ffffff",
-                    strokeWidth: "3px",
-                    strokeLinejoin: "round"
-                  }}
-                >
-                  {node.name}
-                </text>
+                {(!compact || isStart || isDestination) && (
+                  <text
+                    x={compact && isStart ? "-10" : "10"}
+                    y={compact && isStart ? "-8" : "4"}
+                    textAnchor={compact && isStart ? "end" : "start"}
+                    fontFamily="system-ui, -apple-system, sans-serif"
+                    fontSize={isDestination || isStart ? "13" : isSelected ? "12" : "11"}
+                    fontWeight={isDestination || isStart || isSelected ? "700" : "600"}
+                    fill={isDestination ? "#ff4d4d" : isStart ? "#2d5da1" : isInRoute ? "#2d2d2d" : "#4a4641"}
+                    className="pointer-events-none select-none"
+                    style={{
+                      paintOrder: "stroke fill",
+                      stroke: "#ffffff",
+                      strokeWidth: "3px",
+                      strokeLinejoin: "round"
+                    }}
+                  >
+                    {compact 
+                      ? (isDestination ? "Central Auditorium 🎯" : isStart ? "Turing Lab 📍" : node.name)
+                      : node.name
+                    }
+                  </text>
+                )}
               </g>
             );
           })}

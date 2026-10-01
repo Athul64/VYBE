@@ -59,10 +59,20 @@ class ErrorBoundary extends React.Component {
 
 export default function App() {
   // Authentication & Session
+  // Authentication & Session - Default strictly to Logged Out (Visitor/Guest Mode)
   const [currentUser, setCurrentUser] = useState(() => {
     try {
       const saved = localStorage.getItem('vybe_user');
-      return saved ? JSON.parse(saved) : null;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Clear any old default demo admin session so site starts clean
+        if (parsed?.student_id === 'admin' && !parsed?.explicit_login) {
+          localStorage.removeItem('vybe_user');
+          return null;
+        }
+        if (parsed && parsed.student_id) return parsed;
+      }
+      return null;
     } catch {
       return null;
     }
@@ -70,17 +80,17 @@ export default function App() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [pendingApprovalsCount, setPendingApprovalsCount] = useState(0);
 
-  // Personas
+  // Personas - No default admin persona
   const [personas, setPersonas] = useState({});
   const [activePersonaKey, setActivePersonaKey] = useState(() => {
     try {
       const saved = localStorage.getItem('vybe_user');
       if (saved) {
         const parsed = JSON.parse(saved);
-        return parsed.persona_key || 'admin';
+        return parsed?.persona_key || null;
       }
     } catch {}
-    return 'admin';
+    return null;
   });
 
   // Campus Data
@@ -138,18 +148,21 @@ export default function App() {
   };
 
   const handleLoginSuccess = (userData) => {
-    setCurrentUser(userData);
-    localStorage.setItem('vybe_user', JSON.stringify(userData));
-    if (userData.persona_key && userData.persona_key !== activePersonaKey) {
-      setActivePersonaKey(userData.persona_key);
+    const sessionData = { ...userData, explicit_login: true };
+    setCurrentUser(sessionData);
+    localStorage.setItem('vybe_user', JSON.stringify(sessionData));
+    if (sessionData.persona_key && sessionData.persona_key !== activePersonaKey) {
+      setActivePersonaKey(sessionData.persona_key);
     }
     fetchPendingCount();
-    fetchEvents(userData.persona_key || activePersonaKey);
+    fetchEvents(sessionData.persona_key || activePersonaKey);
   };
 
   const handleLogout = () => {
     localStorage.removeItem('vybe_user');
     setCurrentUser(null);
+    setActivePersonaKey(null);
+    fetchEvents(null);
   };
 
   // Fetch Ranked Events when Persona changes
@@ -157,12 +170,15 @@ export default function App() {
     fetchEvents(activePersonaKey);
   }, [activePersonaKey]);
 
-  // Sync navigation origin to active persona
+  // Sync navigation origin to active persona or default to Main Gate
   useEffect(() => {
-    if (personas[activePersonaKey]) {
+    if (activePersonaKey && personas[activePersonaKey]) {
       const p = personas[activePersonaKey];
-      setFromNode(p.current_location_node);
-      setStepFree(p.needs_step_free);
+      setFromNode(p.current_location_node || 'N01');
+      setStepFree(Boolean(p.needs_step_free));
+    } else {
+      setFromNode('N01'); // Main Entrance
+      setStepFree(false);
     }
   }, [activePersonaKey, personas]);
 
@@ -197,9 +213,10 @@ export default function App() {
 
   const fetchEvents = async (studentKey) => {
     try {
-      const resp = await fetch(`${API_BASE}/events?student=${studentKey}`);
+      const url = studentKey ? `${API_BASE}/events?student=${encodeURIComponent(studentKey)}` : `${API_BASE}/events`;
+      const resp = await fetch(url);
       const data = await resp.json();
-      setEvents(data);
+      setEvents(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Events fetch failed:", err);
     }
@@ -238,7 +255,7 @@ export default function App() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          student_id: currentUser.persona_key || activePersonaKey,
+          student_id: currentUser?.student_id || currentUser?.persona_key || activePersonaKey || "STUDENT",
           event_id: event.id
         })
       });
@@ -306,6 +323,8 @@ export default function App() {
               onLogout={handleLogout}
               pendingApprovalsCount={pendingApprovalsCount}
               onOpenAdmin={() => setIsAdminOpen(true)}
+              campusNodes={campusNodes}
+              campusEdges={campusEdges}
             />
           } 
         />
@@ -393,6 +412,8 @@ export default function App() {
               onLogout={handleLogout}
               pendingApprovalsCount={pendingApprovalsCount}
               onOpenAdmin={() => setIsAdminOpen(true)}
+              campusNodes={campusNodes}
+              campusEdges={campusEdges}
             />
           } 
         />

@@ -9,9 +9,7 @@ DEMO_PERSONAS: Dict[str, StudentPersona] = {
         needs_step_free=False,
         interests=["Machine Learning", "Hackathons", "Robotics", "Design", "Cultural", "Open Source"],
         current_location_node="N13",  # Shankara Block Admin Foyer
-        timetable_today=[
-            TimetableSlot(subject="Administrative Desk", start="09:00", end="17:00", node_id="N13"),
-        ],
+        timetable_today=[],  # Administrators do not have student class attendance conflicts
     ),
 }
 

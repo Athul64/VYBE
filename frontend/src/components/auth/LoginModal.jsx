@@ -393,16 +393,9 @@ export const LoginModal = ({
           </form>
         )}
 
-        {/* Admin Quick Credentials Helper */}
-        <div className="mt-4 pt-3 border-t-2 border-dashed border-pencil/30 flex items-center justify-between text-xs font-hand">
-          <span className="text-pencil/70">Admin Access: <strong>admin</strong> / <strong>admin123</strong></span>
-          <button
-            type="button"
-            onClick={() => handleQuickFill('admin', 'admin123')}
-            className="px-2.5 py-1 bg-[#ffebee] hover:bg-marker-red hover:text-white border border-marker-red rounded font-bold text-marker-red transition-all cursor-pointer shadow-xs"
-          >
-            🛡️ Fill Admin Login
-          </button>
+        {/* Clean Credentials Reference Notice without quick-fill */}
+        <div className="mt-4 pt-3 border-t-2 border-dashed border-pencil/30 text-center text-xs font-hand text-pencil/70">
+          <span>Student accounts register freely above • Campus Admin credentials: <strong>admin</strong> / <strong>admin123</strong></span>
         </div>
 
       </div>

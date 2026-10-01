@@ -1,14 +1,17 @@
+import os
+import shutil
 import uuid
 from datetime import datetime
 from typing import List, Optional, Dict, Any
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from .models import (
     Event, EventCreateRequest, RSVPRequest, CheckInRequest, 
     RouteResponse, RankedEventResponse, ClashCheckResult, FreeGapRecommendation,
     LoginRequest, LoginResponse, RegisterRequest, EventModerateRequest,
-    Venue
+    Venue, StudentPersona
 )
 from .graph import CAMPUS_NODES, CAMPUS_EDGES, find_campus_route
 from .seed_data import DEMO_PERSONAS, SEED_VENUES, SEED_EVENTS, SEED_USERS
@@ -29,6 +32,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Ensure uploads folder exists and is mounted for static file serving
+UPLOADS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "uploads"))
+os.makedirs(UPLOADS_DIR, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
 
 # In-memory mutable state initialized from seed data (Clean empty start)
 events_db: List[Event] = [ev.model_copy(deep=True) for ev in SEED_EVENTS]
@@ -155,12 +163,101 @@ def get_personas():
         for key, p in DEMO_PERSONAS.items()
     }
 
+@app.post("/api/upload")
+async def upload_file(file: UploadFile = File(...)):
+    ext = os.path.splitext(file.filename)[1] if file.filename else ".jpg"
+    if not ext:
+        ext = ".jpg"
+    safe_name = f"poster_{uuid.uuid4().hex[:10]}{ext}"
+    dest_path = os.path.join(UPLOADS_DIR, safe_name)
+    with open(dest_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    
+    file_url = f"http://localhost:8000/uploads/{safe_name}"
+    return {
+        "success": True,
+        "filename": safe_name,
+        "url": file_url
+    }
+
+def get_effective_persona(student: Optional[str] = None) -> StudentPersona:
+    from .models import TimetableSlot
+    if not student:
+        return StudentPersona(
+            id="GUEST",
+            name="Guest Student",
+            department="Campus Visitor",
+            needs_step_free=False,
+            interests=["Technology", "Cultural", "Innovation"],
+            current_location_node="N01",
+            timetable_today=[]
+        )
+    
+    clean_raw = student.strip()
+    clean_key = clean_raw.lower()
+    clean_id = clean_raw.upper()
+
+    # 1. Direct match in DEMO_PERSONAS
+    if clean_key in DEMO_PERSONAS:
+        return DEMO_PERSONAS[clean_key]
+    for p in DEMO_PERSONAS.values():
+        if p.id.upper() == clean_id or p.name.lower() == clean_key:
+            return p
+
+    # 2. Match in SEED_USERS
+    if clean_id in SEED_USERS:
+        u = SEED_USERS[clean_id]
+        role = u.get("role", "student")
+        p = StudentPersona(
+            id=u.get("student_id", clean_id),
+            name=u.get("name", "Student"),
+            department=u.get("department", "Computer Science & Engineering"),
+            needs_step_free=bool(u.get("needs_step_free", False)),
+            interests=["AI", "Technology", "Design", "Cultural"],
+            current_location_node=u.get("current_location_node", "N01"),
+            timetable_today=[] if role == "admin" else [
+                TimetableSlot(subject="Morning Session", start="09:30", end="11:00", node_id="N05"),
+                TimetableSlot(subject="Free Break", start="11:00", end="13:00", node_id=None),
+                TimetableSlot(subject="Afternoon Lab", start="13:30", end="15:30", node_id="N08"),
+            ]
+        )
+        DEMO_PERSONAS[clean_key] = p
+        return p
+
+    # 3. If admin identity
+    if "ADMIN" in clean_id:
+        return StudentPersona(
+            id="ADMIN",
+            name="Campus Administrator",
+            department="Campus Administration (ASIET)",
+            needs_step_free=False,
+            interests=["Technology"],
+            current_location_node="N13",
+            timetable_today=[]
+        )
+
+    # 4. Registered student identity (e.g. athul / ASI053)
+    dynamic_student = StudentPersona(
+        id=clean_id,
+        name=clean_raw.split()[0].capitalize() if clean_raw else "Student",
+        department="Computer Science & Engineering",
+        needs_step_free=False,
+        interests=["AI", "Technology", "Design", "Cultural"],
+        current_location_node="N01",
+        timetable_today=[
+            TimetableSlot(subject="Morning Session", start="09:30", end="11:00", node_id="N05"),
+            TimetableSlot(subject="Free Break", start="11:00", end="13:00", node_id=None),
+            TimetableSlot(subject="Afternoon Lab", start="13:30", end="15:30", node_id="N08"),
+        ]
+    )
+    DEMO_PERSONAS[clean_key] = dynamic_student
+    return dynamic_student
+
 @app.get("/api/events", response_model=List[RankedEventResponse])
 def get_ranked_events(
-    student: str = Query("admin", description="Persona identifier")
+    student: Optional[str] = Query(None, description="Persona identifier")
 ):
-    persona_key = student.lower()
-    persona = DEMO_PERSONAS.get(persona_key) or DEMO_PERSONAS.get("admin") or next(iter(DEMO_PERSONAS.values()))
+    persona = get_effective_persona(student)
     # Crucial PRD rule: Only approved events are showcased to students!
     approved_events = [e for e in events_db if e.status == "approved"]
     return rank_events_for_student(persona, approved_events)
@@ -168,13 +265,12 @@ def get_ranked_events(
 @app.get("/api/events/{event_id}")
 def get_single_event(
     event_id: str,
-    student: str = Query("admin", description="Persona identifier")
+    student: Optional[str] = Query(None, description="Persona identifier")
 ):
     ev = next((e for e in events_db if e.id == event_id), None)
     if not ev:
         raise HTTPException(status_code=404, detail="Event not found.")
-    persona_key = student.lower()
-    persona = DEMO_PERSONAS.get(persona_key) or DEMO_PERSONAS.get("admin") or next(iter(DEMO_PERSONAS.values()))
+    persona = get_effective_persona(student)
     ranked = rank_events_for_student(persona, [ev])
     if ranked:
         return ranked[0]
@@ -272,8 +368,8 @@ def create_event(payload: EventCreateRequest):
 
 @app.post("/api/rsvp")
 def handle_rsvp(payload: RSVPRequest):
-    persona_key = payload.student_id.lower()
-    persona = DEMO_PERSONAS.get(persona_key) or DEMO_PERSONAS.get("admin") or next(iter(DEMO_PERSONAS.values()))
+    persona = get_effective_persona(payload.student_id)
+    persona_key = persona.id.lower()
     
     event = next((e for e in events_db if e.id == payload.event_id), None)
     if not event:
@@ -307,12 +403,11 @@ def handle_rsvp(payload: RSVPRequest):
 
 @app.post("/api/check-clash")
 def handle_check_clash(payload: RSVPRequest):
-    persona_key = payload.student_id.lower()
-    persona = DEMO_PERSONAS.get(persona_key) or DEMO_PERSONAS.get("admin") or next(iter(DEMO_PERSONAS.values()))
+    persona = get_effective_persona(payload.student_id)
     event = next((e for e in events_db if e.id == payload.event_id), None)
     if not event:
         raise HTTPException(status_code=404, detail="Event not found.")
-    curr_rsvps = student_rsvps.get(persona_key, [])
+    curr_rsvps = student_rsvps.get(payload.student_id.lower(), [])
     clash_result = check_student_clash(persona, event, events_db, curr_rsvps)
     return {
         "success": True,
@@ -321,10 +416,9 @@ def handle_check_clash(payload: RSVPRequest):
 
 @app.get("/api/free-gaps", response_model=List[FreeGapRecommendation])
 def get_free_gaps(
-    student: str = Query("admin", description="Persona identifier")
+    student: Optional[str] = Query(None, description="Persona identifier")
 ):
-    persona_key = student.lower()
-    persona = DEMO_PERSONAS.get(persona_key) or DEMO_PERSONAS.get("admin") or next(iter(DEMO_PERSONAS.values()))
+    persona = get_effective_persona(student)
     approved_events = [e for e in events_db if e.status == "approved"]
     return find_events_for_free_gaps(persona, approved_events)
 

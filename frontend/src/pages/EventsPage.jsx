@@ -117,56 +117,85 @@ export const EventsPage = ({
 
 
         {/* Action Buttons */}
+        {/* Action Buttons & Profile Controls */}
         <div className="flex items-center gap-2">
           {/* User ID Authentication Pill */}
-          <div 
-            onClick={onOpenLogin}
-            title="Click to switch account or sign in"
-            className="flex items-center gap-1.5 px-2.5 py-1 bg-white border-2 border-pencil rounded-lg shadow-xs cursor-pointer hover:bg-paper-yellow transition-all text-xs"
-          >
-            <span className="text-[10px] font-bold px-1 rounded bg-pencil text-white uppercase">
-              {currentUser?.role || 'Guest'}
-            </span>
-            <span className="font-bold text-pencil truncate max-w-[90px] sm:max-w-none">
-              {currentUser?.name || 'Sign In'}
-            </span>
-            <span className="text-pencil/60 text-[11px] font-mono hidden md:inline">
-              ({currentUser?.student_id || 'ID'})
-            </span>
-          </div>
-
-          <button
-            onClick={onOpenFreeGap}
-            className="px-3 py-1 text-xs sm:text-sm font-bold bg-paper-yellow hover:bg-pencil hover:text-paper-yellow text-pencil border-2 border-pencil rounded-lg shadow-[2px_2px_0px_#2d2d2d] flex items-center gap-1.5 cursor-pointer transition-all"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-marker-red fill-marker-red" />
-            <span>Free Gap</span> 💡
-          </button>
-
-          <button
-            onClick={onOpenCreateEvent}
-            className="px-3 py-1 text-xs sm:text-sm font-bold bg-white hover:bg-marker-red hover:text-white text-pencil border-2 border-pencil rounded-lg shadow-[2px_2px_0px_#2d2d2d] flex items-center gap-1.5 cursor-pointer transition-all"
-          >
-            <PlusCircle className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">Post Event</span>
-          </button>
-
-          <button
-            onClick={onOpenAdmin}
-            className={`px-3 py-1 text-xs sm:text-sm font-bold border-2 border-pencil rounded-lg shadow-[2px_2px_0px_#2d2d2d] flex items-center gap-1.5 cursor-pointer transition-all ${
-              pendingApprovalsCount > 0
-                ? 'bg-marker-red text-white hover:bg-pencil'
-                : 'bg-paper-muted hover:bg-marker-blue hover:text-white text-pencil'
-            }`}
-          >
-            <LayoutDashboard className="w-3.5 h-3.5" />
-            <span>{currentUser?.role === 'admin' ? 'Admin Desk' : 'Ledger'}</span>
-            {pendingApprovalsCount > 0 && (
-              <span className="px-1.5 py-0.2 bg-white text-marker-red text-[10px] rounded-full font-bold">
-                {pendingApprovalsCount}
+          {currentUser ? (
+            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white border-2 border-pencil rounded-lg shadow-xs text-xs">
+              <span className={`text-[10px] font-bold px-1 rounded text-white uppercase ${
+                currentUser.role === 'admin' ? 'bg-marker-red' : 'bg-pencil'
+              }`}>
+                {currentUser.role === 'admin' ? 'ADMIN' : 'STUDENT'}
               </span>
-            )}
-          </button>
+              <span className="font-bold text-pencil truncate max-w-[100px] sm:max-w-none">
+                {currentUser.name}
+              </span>
+              <span className="text-pencil/60 text-[11px] font-mono hidden md:inline">
+                ({currentUser.student_id})
+              </span>
+              <button
+                onClick={onOpenLogin}
+                className="ml-0.5 text-[11px] underline font-bold text-marker-blue hover:text-marker-red cursor-pointer"
+                title="Switch User Account"
+              >
+                Switch
+              </button>
+              <button
+                onClick={onLogout}
+                className="ml-1 px-1.5 py-0.5 text-[10px] bg-paper-bg hover:bg-marker-red hover:text-white border border-pencil rounded font-bold transition-colors cursor-pointer"
+                title="Sign Out"
+              >
+                Sign Out 🚪
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={onOpenLogin}
+              className="px-3 py-1 text-xs font-bold border-2 border-pencil rounded-lg bg-paper-yellow hover:bg-pencil hover:text-white transition-all cursor-pointer shadow-[2px_2px_0px_#2d2d2d]"
+            >
+              Sign In / Register 🪪
+            </button>
+          )}
+
+          {/* Role-Specific Header Action Buttons */}
+          {currentUser?.role === 'admin' ? (
+            /* ADMIN ACTIONS */
+            <>
+              <button
+                onClick={onOpenAdmin}
+                className={`px-3 py-1 text-xs sm:text-sm font-bold border-2 border-pencil rounded-lg shadow-[2px_2px_0px_#2d2d2d] flex items-center gap-1.5 cursor-pointer transition-all ${
+                  pendingApprovalsCount > 0
+                    ? 'bg-marker-red text-white hover:bg-pencil animate-pulse'
+                    : 'bg-[#ffebee] hover:bg-marker-red hover:text-white text-marker-red'
+                }`}
+              >
+                <LayoutDashboard className="w-3.5 h-3.5" />
+                <span>Moderation Desk</span>
+                {pendingApprovalsCount > 0 && (
+                  <span className="px-1.5 py-0.2 bg-white text-marker-red text-[10px] rounded-full font-bold">
+                    {pendingApprovalsCount}
+                  </span>
+                )}
+              </button>
+
+              <button
+                onClick={onOpenCreateEvent}
+                className="px-3 py-1 text-xs sm:text-sm font-bold bg-white hover:bg-pencil hover:text-white text-pencil border-2 border-pencil rounded-lg shadow-[2px_2px_0px_#2d2d2d] flex items-center gap-1.5 cursor-pointer transition-all"
+              >
+                <PlusCircle className="w-3.5 h-3.5 text-marker-red" />
+                <span className="hidden md:inline">Publish Event</span>
+              </button>
+            </>
+          ) : (
+            /* STUDENT & GUEST ACTION */
+            <button
+              onClick={onOpenCreateEvent}
+              className="px-3.5 py-1 text-xs sm:text-sm font-bold bg-marker-red hover:bg-pencil text-white border-2 border-pencil rounded-lg shadow-[2px_2px_0px_#2d2d2d] flex items-center gap-1.5 cursor-pointer transition-all"
+            >
+              <PlusCircle className="w-3.5 h-3.5" />
+              <span>+ Propose Event</span>
+            </button>
+          )}
 
           <button
             onClick={onResetDemo}
@@ -194,68 +223,31 @@ export const EventsPage = ({
         </div>
       )}
 
-      {/* 2. FAST JUDGING DEMO SCRIPT RIBBON */}
-      <div className="h-9 shrink-0 bg-paper-yellow/90 border-b-2 border-dashed border-pencil/30 px-4 flex items-center justify-between gap-2 text-xs overflow-x-auto">
-        <div className="flex items-center gap-1.5 shrink-0">
+      {/* 2. DYNAMIC CAMPUS TRAIL RIBBON */}
+      <div className="h-9 shrink-0 bg-paper-yellow/90 border-b-2 border-dashed border-pencil/30 px-4 flex items-center justify-between gap-3 text-xs overflow-x-auto">
+        <div className="flex items-center gap-2 shrink-0">
           <span className="w-2 h-2 rounded-full bg-marker-red"></span>
-          <span className="font-marker font-bold text-pencil text-xs">⚡ Campus Trail Tools:</span>
+          <span className="font-marker font-bold text-pencil text-xs">
+            Adi Shankara (ASIET) Kalady • Campus Trail & Event Discovery
+          </span>
         </div>
 
-        <div className="flex items-center gap-1.5 overflow-x-auto py-0.5">
-          <button
-            onClick={onOpenCreateEvent}
-            className="px-2.5 py-0.5 bg-marker-red text-white border border-pencil rounded hover:bg-pencil cursor-pointer shrink-0 font-bold flex items-center gap-1"
-          >
-            <PlusCircle className="w-3.5 h-3.5" />
-            <span>+ Propose Event ✍️</span>
-          </button>
-
-          <button
-            onClick={onOpenFreeGap}
-            className="px-2.5 py-0.5 bg-paper-yellow border border-pencil rounded hover:bg-white cursor-pointer shrink-0 font-bold"
-          >
-            💡 Free Window Finder
-          </button>
-
-          <button
-            onClick={() => {
-              const newStepFree = !stepFree;
-              setStepFree(newStepFree);
-              if (fromNode && toNode) calculateRoute(fromNode, toNode, newStepFree, rainMode);
-            }}
-            className={`px-2.5 py-0.5 border border-pencil rounded cursor-pointer shrink-0 font-bold transition-all ${
-              stepFree ? 'bg-marker-blue text-white' : 'bg-white text-pencil hover:bg-paper-yellow'
-            }`}
-          >
-            ♿ Step-Free ({stepFree ? 'Active' : 'Off'})
-          </button>
-
-          <button
-            onClick={() => {
-              const newRain = !rainMode;
-              setRainMode(newRain);
-              if (fromNode && toNode) calculateRoute(fromNode, toNode, stepFree, newRain);
-            }}
-            className={`px-2.5 py-0.5 border border-pencil rounded cursor-pointer shrink-0 font-bold transition-all ${
-              rainMode ? 'bg-[#2d5da1] text-white' : 'bg-white text-pencil hover:bg-paper-yellow'
-            }`}
-          >
-            ☂️ Rain Sheltered ({rainMode ? 'Active' : 'Off'})
-          </button>
-
-          {currentUser?.role === 'admin' && (
+        <div className="flex items-center gap-3 shrink-0">
+          {currentUser?.role !== 'admin' && (
             <button
-              onClick={onOpenAdmin}
-              className="px-2.5 py-0.5 bg-[#ffebee] border border-marker-red text-marker-red rounded hover:bg-marker-red hover:text-white cursor-pointer shrink-0 font-bold"
+              onClick={onOpenFreeGap}
+              className="px-2.5 py-0.5 bg-white hover:bg-pencil hover:text-white border border-pencil rounded cursor-pointer font-bold transition-colors flex items-center gap-1 shadow-xs"
+              title="Find events fitting your timetable free hours"
             >
-              🛡️ Moderation Desk ({pendingApprovalsCount})
+              <Sparkles className="w-3.5 h-3.5 text-marker-red fill-marker-red" />
+              <span>What Fits My Free Hour?</span>
             </button>
           )}
-        </div>
 
-        <span className="hidden xl:inline text-[11px] text-pencil/70 font-mono shrink-0">
-          Walk ETA: 1.2 m/s • 25 Nodes
-        </span>
+          <span className="hidden md:inline text-[11px] text-pencil/70 font-mono">
+            Walking Pace: 1.2 m/s • 25 Architectural Nodes
+          </span>
+        </div>
       </div>
 
       {/* 3. MAIN WORKSPACE BODY */}
@@ -264,12 +256,41 @@ export const EventsPage = ({
         {/* LEFT COLUMN: Student Schedule & Ranked Events Feed (5 Cols) */}
         <div className="col-span-12 lg:col-span-5 h-full flex flex-col min-h-0 bg-white border-2 border-pencil rounded-xl p-3.5 shadow-sketch relative">
 
-          {/* Student Dossier & Schedule Mini-Strip */}
-          {activePersona && (
+          {/* Header Panel: Admin Console vs Student Timetable vs Guest Welcome */}
+          {currentUser?.role === 'admin' ? (
+            /* 1. ADMIN WORKSPACE STRIP */
+            <div className="shrink-0 p-2.5 bg-[#ffebee]/80 border-2 border-marker-red rounded-lg mb-2.5 text-xs">
+              <div className="flex items-center justify-between mb-1">
+                <span className="font-marker text-sm text-pencil font-bold flex items-center gap-1.5">
+                  <span className="text-base">🛡️</span> Campus Administration Workspace
+                </span>
+                <span className="text-[10px] px-2 py-0.5 bg-marker-red text-white rounded font-bold uppercase">
+                  Dean of Student Affairs
+                </span>
+              </div>
+              <p className="text-[11px] text-pencil/80 leading-tight mb-2">
+                Monitoring live halls, campus venues, and student proposals across Adi Shankara (ASIET).
+              </p>
+              <div className="flex items-center gap-3 text-[11px] font-bold text-pencil/90">
+                <span className="px-2 py-0.5 bg-white border border-pencil rounded">
+                  📋 Live Feed: {filteredEvents.length} events
+                </span>
+                <span className={`px-2 py-0.5 border rounded ${
+                  pendingApprovalsCount > 0 ? 'bg-marker-red text-white border-marker-red' : 'bg-white border-pencil text-pencil'
+                }`}>
+                  ⏳ Pending Approvals: {pendingApprovalsCount}
+                </span>
+                <span className="px-2 py-0.5 bg-white border border-pencil rounded font-mono hidden sm:inline">
+                  🏛️ 6 Venues Active
+                </span>
+              </div>
+            </div>
+          ) : activePersona ? (
+            /* 2. STUDENT DOSSIER & SCHEDULE STRIP */
             <div className="shrink-0 p-2.5 bg-paper-yellow/30 border border-pencil/40 rounded-lg mb-2.5 text-xs">
               <div className="flex items-center justify-between mb-1.5">
                 <span className="font-marker text-base text-pencil font-bold">
-                  {activePersona.name}'s Schedule ({activePersona.department})
+                  {currentUser?.name || activePersona.name}'s Class Schedule ({currentUser?.department || activePersona.department})
                 </span>
                 <span className="text-[11px] px-2 py-0.5 bg-white border border-pencil rounded font-semibold text-marker-blue">
                   Spot: <strong>{activePersona.current_location_node}</strong> ({activePersona.location_name})
@@ -296,6 +317,21 @@ export const EventsPage = ({
                   );
                 })}
               </div>
+            </div>
+          ) : (
+            /* 3. GUEST VISITOR STRIP */
+            <div className="shrink-0 p-2.5 bg-paper-yellow/40 border border-pencil/30 rounded-lg mb-2.5 text-xs flex items-center justify-between">
+              <div>
+                <span className="font-marker text-xs text-pencil font-bold block">
+                  👋 Campus Visitor Mode
+                </span>
+                <span className="text-[11px] text-pencil/70">
+                  Showing verified events at Adi Shankara (ASIET). Sign in anytime above to RSVP or propose sessions.
+                </span>
+              </div>
+              <span className="text-[11px] px-2 py-0.5 bg-white border border-pencil rounded font-mono font-bold text-pencil/70">
+                Visitor
+              </span>
             </div>
           )}
 
@@ -328,24 +364,21 @@ export const EventsPage = ({
                     : 'bg-paper-bg hover:bg-paper-yellow text-pencil border-pencil/30'
                 }`}
               >
-                ⚡ Live Events ({filteredEvents.length})
+                <span>Live Events Feed ({filteredEvents.length})</span>
               </button>
 
-              <button
-                onClick={() => setViewTab('my_submissions')}
-                className={`px-3 py-1 font-hand font-bold text-xs rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 ${
-                  viewTab === 'my_submissions'
-                    ? 'bg-paper-yellow text-pencil border-pencil shadow-xs'
-                    : 'bg-paper-bg hover:bg-paper-yellow text-pencil border-pencil/30'
-                }`}
-              >
-                <span>📝 My Proposals</span>
-                {myEvents.length > 0 && (
-                  <span className="px-1.5 py-0.2 bg-pencil text-white text-[10px] rounded font-mono font-bold">
-                    {myEvents.length}
-                  </span>
-                )}
-              </button>
+              {currentUser && (
+                <button
+                  onClick={() => setViewTab('my_submissions')}
+                  className={`px-3 py-1 font-hand font-bold text-xs rounded-lg border transition-all cursor-pointer ${
+                    viewTab === 'my_submissions'
+                      ? 'bg-pencil text-white border-pencil shadow-xs'
+                      : 'bg-paper-bg hover:bg-paper-yellow text-pencil border-pencil/30'
+                  }`}
+                >
+                  <span>My Submissions ({myEvents.length})</span>
+                </button>
+              )}
             </div>
 
             <span className="text-[11px] text-pencil/60 font-medium hidden sm:inline">
@@ -476,22 +509,14 @@ export const EventsPage = ({
                 <p className="font-hand text-sm text-pencil/80 max-w-sm mx-auto mb-4 leading-relaxed">
                   All dummy events have been cleared. Be the first student or club to propose a live event or workshop at Adi Shankara (ASIET) Kalady!
                 </p>
-                <div className="flex flex-wrap items-center justify-center gap-2">
+                <div className="flex items-center justify-center">
                   <button
                     onClick={onOpenCreateEvent}
                     className="px-4 py-2 bg-marker-red hover:bg-pencil text-white font-bold text-sm border-2 border-pencil rounded-lg shadow-[2px_2px_0px_#2d2d2d] transition-all cursor-pointer flex items-center gap-1.5"
                   >
                     <PlusCircle className="w-4 h-4 stroke-[2.5]" />
-                    <span>Propose an Event Now ✍️</span>
+                    <span>{currentUser?.role === 'admin' ? 'Publish First Campus Event ✍️' : 'Propose First Event Now ✍️'}</span>
                   </button>
-                  {currentUser?.role === 'admin' && (
-                    <button
-                      onClick={onOpenAdmin}
-                      className="px-3 py-2 bg-paper-yellow hover:bg-pencil hover:text-white text-pencil font-bold text-sm border-2 border-pencil rounded-lg shadow-[2px_2px_0px_#2d2d2d] transition-all cursor-pointer"
-                    >
-                      🛡️ Open Admin Moderation
-                    </button>
-                  )}
                 </div>
               </div>
             ) : (
