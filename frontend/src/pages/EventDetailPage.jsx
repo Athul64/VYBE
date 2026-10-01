@@ -25,7 +25,9 @@ export const EventDetailPage = ({
   venues = {},
   onOpenFreeGap,
   currentUser,
-  onOpenLogin
+  onOpenLogin,
+  theme = 'light',
+  onToggleTheme = () => {}
 }) => {
   const { eventId } = useParams();
   const navigate = useNavigate();
@@ -175,6 +177,14 @@ export const EventDetailPage = ({
               <span>🪪 {currentUser?.student_id || 'Sign In'}</span>
               <span className="text-pencil/70">({currentUser?.name || currentPersona?.name})</span>
             </div>
+
+            <button
+              onClick={onToggleTheme}
+              title={theme === 'dark' ? "Switch to Light Notebook" : "Switch to Dark Slate Blackboard"}
+              className="p-1 border-2 border-pencil rounded-lg bg-paper-bg hover:bg-paper-yellow transition-colors cursor-pointer shadow-[2px_2px_0px_#2d2d2d] flex items-center justify-center text-xs"
+            >
+              {theme === 'dark' ? '☀️' : '🌙'}
+            </button>
           </div>
         </div>
       </header>

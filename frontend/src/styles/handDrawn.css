@@ -1,17 +1,38 @@
 /* src/styles/handDrawn.css */
 @import url('https://fonts.googleapis.com/css2?family=Kalam:wght@700&family=Patrick+Hand&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
+:root {
+  --paper-bg: #fdfbf7;
+  --paper-muted: #e5e0d8;
+  --paper-yellow: #fff9c4;
+  --pencil: #2d2d2d;
+  --marker-red: #ff4d4d;
+  --marker-blue: #2d5da1;
+  --dot-grid: #e5e0d8;
+}
+
+html.dark {
+  --paper-bg: #141312;
+  --paper-muted: #272522;
+  --paper-yellow: #322d17;
+  --pencil: #f3f0ea;
+  --marker-red: #ff5e5e;
+  --marker-blue: #5ba2ff;
+  --dot-grid: #282623;
+}
+
 body {
-  background-color: #fdfbf7;
-  color: #2d2d2d;
-  background-image: radial-gradient(#e5e0d8 1.2px, transparent 1.2px);
+  background-color: var(--paper-bg);
+  color: var(--pencil);
+  background-image: radial-gradient(var(--dot-grid) 1.2px, transparent 1.2px);
   background-size: 22px 22px; /* Notebook paper dot-grid */
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Crisp, natural sketchbook borders (no pinching or warped distortion) */
+/* Crisp sketchbook borders */
 .border-wobbly {
   border-radius: 10px;
 }
@@ -79,16 +100,223 @@ body {
   box-shadow: 4px 4px 0px #2d2d2d;
 }
 
+/* Dark Mode Overrides for surfaces with hardcoded white backgrounds */
+html.dark .bg-white {
+  background-color: #1e1d1b !important;
+  color: #f3f0ea !important;
+}
+
+html.dark .bg-white\/90,
+html.dark .bg-white\/95 {
+  background-color: rgba(30, 29, 27, 0.95) !important;
+}
+
+html.dark .bg-white\/80 {
+  background-color: rgba(30, 29, 27, 0.85) !important;
+}
+
+html.dark .bg-white\/50,
+html.dark .bg-white\/40 {
+  background-color: rgba(30, 29, 27, 0.5) !important;
+}
+
+html.dark .border-pencil {
+  border-color: #4a4742 !important;
+}
+
+html.dark [class*="border-pencil/"] {
+  border-color: rgba(180, 175, 168, 0.25) !important;
+}
+
+html.dark [class*="text-pencil/"] {
+  color: rgba(243, 240, 234, 0.75) !important;
+}
+
+html.dark .shadow-sketch,
+html.dark [class*="shadow-["] {
+  box-shadow: 3px 3px 0px 0px #080707 !important;
+}
+
+html.dark .shadow-sketchLg {
+  box-shadow: 5px 5px 0px 0px #080707 !important;
+}
+
+html.dark .tape-strip {
+  background-color: rgba(60, 56, 52, 0.9);
+  border-left-color: rgba(180, 175, 168, 0.35);
+  border-right-color: rgba(180, 175, 168, 0.35);
+}
+
+html.dark .thumbtack {
+  border-color: #080707;
+  box-shadow: 1.5px 1.5px 0px #080707;
+}
+
+/* Dark mode for Map SVG */
+html.dark svg {
+  background-color: #171615 !important;
+}
+
+html.dark svg rect[fill="#f7f3ec"] {
+  fill: #262421;
+  stroke: #5a554e;
+}
+
+html.dark svg ellipse[fill="#f4efe6"] {
+  fill: #23211e;
+  stroke: #5a554e;
+}
+
+html.dark svg path[fill="#edf4e8"] {
+  fill: #1a2518;
+  stroke: #44593f;
+}
+
+html.dark svg text[fill="#6e685f"] {
+  fill: #d5d0c7;
+}
+
+html.dark svg text[fill="#5f7753"],
+html.dark svg text[fill="#78926b"] {
+  fill: #97b988;
+}
+
+html.dark svg g[stroke="#e5e0d8"] line {
+  stroke: #262320;
+}
+
+html.dark svg text[style*="paint-order"] {
+  stroke: #1e1d1b !important;
+}
+
 /* Custom scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #fdfbf7;
-  border-left: 1px solid #e5e0d8;
+  background: var(--paper-bg);
+  border-left: 1px solid var(--paper-muted);
 }
 ::-webkit-scrollbar-thumb {
-  background: #2d2d2d;
+  background: var(--pencil);
   border-radius: 3px;
 }
+
+/* ==========================================================================
+   DARK MODE BUTTON & HOVER CONTRAST ENFORCEMENT
+   Prevents invisible white-on-white text and illegible button hover states
+   ========================================================================== */
+
+/* Buttons with hover:bg-pencil: in dark mode, hover to refined dark charcoal slate with white text */
+html.dark .hover\:bg-pencil:hover,
+html.dark [class*="hover:bg-pencil"]:hover {
+  background-color: #383530 !important;
+  color: #ffffff !important;
+  border-color: #6b665c !important;
+}
+html.dark .hover\:bg-pencil:hover *,
+html.dark [class*="hover:bg-pencil"]:hover * {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* Buttons with hover:bg-white: in dark mode, hover to soft graphite slate with white text */
+html.dark .hover\:bg-white:hover,
+html.dark [class*="hover:bg-white"]:hover {
+  background-color: #2e2b27 !important;
+  color: #ffffff !important;
+  border-color: #6b665c !important;
+}
+html.dark .hover\:bg-white:hover *,
+html.dark [class*="hover:bg-white"]:hover * {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* Red button hovers in dark mode */
+html.dark .hover\:bg-marker-red:hover,
+html.dark [class*="hover:bg-marker-red"]:hover {
+  background-color: #ff5252 !important;
+  color: #ffffff !important;
+  border-color: #ff7878 !important;
+}
+html.dark .hover\:bg-marker-red:hover *,
+html.dark [class*="hover:bg-marker-red"]:hover * {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* Blue button hovers in dark mode */
+html.dark .hover\:bg-marker-blue:hover,
+html.dark [class*="hover:bg-marker-blue"]:hover {
+  background-color: #3b82f6 !important;
+  color: #ffffff !important;
+  border-color: #60a5fa !important;
+}
+html.dark .hover\:bg-marker-blue:hover *,
+html.dark [class*="hover:bg-marker-blue"]:hover * {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* Yellow button hovers in dark mode */
+html.dark .hover\:bg-paper-yellow:hover,
+html.dark [class*="hover:bg-paper-yellow"]:hover {
+  background-color: #d97706 !important;
+  color: #ffffff !important;
+  border-color: #f59e0b !important;
+}
+html.dark .hover\:bg-paper-yellow:hover *,
+html.dark [class*="hover:bg-paper-yellow"]:hover * {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* Paper-bg hovers in dark mode */
+html.dark .hover\:bg-paper-bg:hover,
+html.dark [class*="hover:bg-paper-bg"]:hover {
+  background-color: #2b2825 !important;
+  color: #ffffff !important;
+  border-color: #555047 !important;
+}
+html.dark .hover\:bg-paper-bg:hover *,
+html.dark [class*="hover:bg-paper-bg"]:hover * {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* Background pencil elements in dark mode (active tabs, pills) */
+html.dark .bg-pencil {
+  background-color: #2b2825 !important;
+  color: #ffffff !important;
+  border-color: #6b665c !important;
+}
+html.dark .bg-pencil * {
+  color: #ffffff !important;
+}
+
+/* Light pastel pill badges in dark mode (e.g. green registered pill, soft red clash) */
+html.dark .bg-\[\#e8f5e9\] {
+  background-color: #1c3320 !important;
+  color: #81c784 !important;
+}
+html.dark .bg-\[\#ffebee\] {
+  background-color: #3b1c1e !important;
+  color: #ef9a9a !important;
+}
+
+/* Inputs and select dropdowns in dark mode */
+html.dark input,
+html.dark select,
+html.dark textarea {
+  background-color: #1e1d1b !important;
+  color: #f3f0ea !important;
+  border-color: #4a4742 !important;
+}
+
+html.dark option {
+  background-color: #1e1d1b !important;
+  color: #f3f0ea !important;
+}
+

@@ -79,6 +79,30 @@ export default function App() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [pendingApprovalsCount, setPendingApprovalsCount] = useState(0);
 
+  // Dark Mode Theme State
+  const [theme, setTheme] = useState(() => {
+    try {
+      const saved = localStorage.getItem('vybe_theme');
+      if (saved) return saved;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    } catch {
+      return 'light';
+    }
+  });
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('vybe_theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
+
   // Personas - No default admin persona
   const [personas, setPersonas] = useState({});
   const [activePersonaKey, setActivePersonaKey] = useState(() => {
@@ -321,6 +345,8 @@ export default function App() {
               onOpenAdmin={() => setIsAdminOpen(true)}
               campusNodes={campusNodes}
               campusEdges={campusEdges}
+              theme={theme}
+              onToggleTheme={toggleTheme}
             />
           } 
         />
@@ -369,6 +395,8 @@ export default function App() {
               currentStepIndex={currentStepIndex}
               speakSteps={speakSteps}
               stopSpeech={stopSpeech}
+              theme={theme}
+              onToggleTheme={toggleTheme}
             />
           } 
         />
@@ -390,6 +418,8 @@ export default function App() {
               onOpenFreeGap={() => setIsFreeGapOpen(true)}
               currentUser={currentUser}
               onOpenLogin={() => setIsLoginOpen(true)}
+              theme={theme}
+              onToggleTheme={toggleTheme}
             />
           } 
         />
@@ -410,6 +440,8 @@ export default function App() {
               onOpenAdmin={() => setIsAdminOpen(true)}
               campusNodes={campusNodes}
               campusEdges={campusEdges}
+              theme={theme}
+              onToggleTheme={toggleTheme}
             />
           } 
         />

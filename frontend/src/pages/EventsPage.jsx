@@ -49,7 +49,9 @@ export const EventsPage = ({
   isSpeaking,
   currentStepIndex,
   speakSteps,
-  stopSpeech
+  stopSpeech,
+  theme = 'light',
+  onToggleTheme = () => {}
 }) => {
   const navigate = useNavigate();
   const activePersona = personas[activePersonaKey];
@@ -198,9 +200,17 @@ export const EventsPage = ({
           )}
 
           <button
+            onClick={onToggleTheme}
+            title={theme === 'dark' ? "Switch to Light Notebook" : "Switch to Dark Slate Blackboard"}
+            className="p-1.5 border-2 border-pencil rounded-lg bg-paper-bg hover:bg-paper-yellow transition-colors cursor-pointer shadow-[2px_2px_0px_#2d2d2d] flex items-center justify-center text-xs"
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
+
+          <button
             onClick={onResetDemo}
             title="Reset seeded demo state"
-            className="p-1.5 border-2 border-pencil rounded-lg bg-white hover:bg-paper-yellow transition-colors cursor-pointer shadow-[2px_2px_0px_#2d2d2d]"
+            className="p-1.5 border-2 border-pencil rounded-lg bg-paper-bg hover:bg-paper-yellow transition-colors cursor-pointer shadow-[2px_2px_0px_#2d2d2d]"
           >
             <RotateCcw className="w-3.5 h-3.5" />
           </button>

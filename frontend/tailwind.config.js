@@ -1,18 +1,19 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: "class",
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
       colors: {
         paper: {
-          bg: "#fdfbf7",       // Warm Paper background
-          muted: "#e5e0d8",    // Old Paper / Erased Pencil
-          yellow: "#fff9c4",   // Post-it Sticky Note
+          bg: "var(--paper-bg, #fdfbf7)",       // Warm Paper background / Dark Slate
+          muted: "var(--paper-muted, #e5e0d8)", // Old Paper / Erased Pencil
+          yellow: "var(--paper-yellow, #fff9c4)",// Post-it Sticky Note / Golden Chalk
         },
-        pencil: "#2d2d2d",     // Soft Pencil Black (never #000)
+        pencil: "var(--pencil, #2d2d2d)",       // Soft Pencil Black / Chalk White
         marker: {
-          red: "#ff4d4d",      // Red Correction Marker (errors, accents, pins)
-          blue: "#2d5da1",     // Blue Ballpoint Pen (secondary accents, focus)
+          red: "var(--marker-red, #ff4d4d)",    // Red Correction Marker / Neon Coral
+          blue: "var(--marker-blue, #2d5da1)",  // Blue Ballpoint Pen / Cyan Blueprint
         },
       },
       fontFamily: {

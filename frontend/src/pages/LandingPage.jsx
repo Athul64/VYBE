@@ -16,7 +16,9 @@ export const LandingPage = ({
   onOpenAdmin = () => {},
   campusNodes = {},
   campusEdges = [],
-  activeRoute = null
+  activeRoute = null,
+  theme = 'light',
+  onToggleTheme = () => {}
 }) => {
   const navigate = useNavigate();
 
@@ -79,6 +81,14 @@ export const LandingPage = ({
               )}
             </button>
           )}
+
+          <button
+            onClick={onToggleTheme}
+            title={theme === 'dark' ? "Switch to Light Notebook" : "Switch to Dark Slate Blackboard"}
+            className="p-2 border-2 border-pencil rounded-xl bg-paper-bg hover:bg-paper-yellow transition-all cursor-pointer shadow-[2px_2px_0px_#2d2d2d] flex items-center justify-center text-sm"
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
 
           <button
             onClick={() => navigate('/events')}
