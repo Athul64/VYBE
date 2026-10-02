@@ -4,6 +4,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { LandingPage } from './pages/LandingPage';
 import { EventsPage } from './pages/EventsPage';
 import { EventDetailPage } from './pages/EventDetailPage';
+import { AdminPage } from './pages/AdminPage';
+import { StudentPage } from './pages/StudentPage';
 
 import { QrPassModal } from './components/student/QrPassModal';
 import { FreeGapFinder } from './components/feed/FreeGapFinder';
@@ -419,6 +421,42 @@ export default function App() {
               onOpenLogin={() => setIsLoginOpen(true)}
               theme={theme}
               onToggleTheme={toggleTheme}
+            />
+          } 
+        />
+
+        {/* 4. Dedicated Admin Portal Page */}
+        <Route 
+          path="/admin" 
+          element={
+            <AdminPage
+              currentUser={currentUser}
+              onLoginSuccess={handleLoginSuccess}
+              onLogout={handleLogout}
+              theme={theme}
+              onToggleTheme={toggleTheme}
+              onResetDemo={handleResetDemo}
+            />
+          } 
+        />
+
+        {/* 5. Dedicated Student Portal Page */}
+        <Route 
+          path="/student" 
+          element={
+            <StudentPage
+              currentUser={currentUser}
+              personas={personas}
+              activePersonaKey={activePersonaKey}
+              setActivePersonaKey={setActivePersonaKey}
+              rsvpdEventIds={rsvpdEventIds}
+              onOpenPass={handleOpenPass}
+              onOpenLogin={() => setIsLoginOpen(true)}
+              onLogout={handleLogout}
+              theme={theme}
+              onToggleTheme={toggleTheme}
+              campusNodes={campusNodes}
+              venues={venues}
             />
           } 
         />

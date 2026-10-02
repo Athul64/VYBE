@@ -68,19 +68,30 @@ export const LandingPage = ({
             </button>
           )}
 
-          {currentUser?.role === 'admin' && (
-            <button
-              onClick={onOpenAdmin}
-              className="px-3 py-1.5 font-bold text-xs border-2 border-marker-red rounded-lg bg-[#ffebee] hover:bg-marker-red hover:text-white transition-all cursor-pointer flex items-center gap-1.5 shadow-[2px_2px_0px_#ff4d4d]"
-            >
-              <span>🛡️ Moderation Desk</span>
-              {pendingApprovalsCount > 0 && (
-                <span className="px-1.5 py-0.2 bg-marker-red text-white text-[10px] rounded-full font-bold">
-                  {pendingApprovalsCount}
-                </span>
-              )}
-            </button>
-          )}
+          {/* Student Portal Link */}
+          <button
+            onClick={() => navigate('/student')}
+            className="px-3 py-1.5 font-bold text-xs border-2 border-pencil rounded-lg bg-paper-bg hover:bg-paper-yellow transition-all cursor-pointer flex items-center gap-1 shadow-xs"
+          >
+            <span>🎓 Student Portal</span>
+          </button>
+
+          {/* Admin Desk Link */}
+          <button
+            onClick={() => navigate('/admin')}
+            className={`px-3 py-1.5 font-bold text-xs border-2 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 shadow-xs ${
+              currentUser?.role === 'admin'
+                ? 'border-marker-red bg-[#ffebee] hover:bg-marker-red hover:text-white text-marker-red'
+                : 'border-pencil bg-paper-bg hover:bg-paper-yellow text-pencil'
+            }`}
+          >
+            <span>🛡️ Admin Desk</span>
+            {pendingApprovalsCount > 0 && (
+              <span className="px-1.5 py-0.2 bg-marker-red text-white text-[10px] rounded-full font-bold">
+                {pendingApprovalsCount}
+              </span>
+            )}
+          </button>
 
           <button
             onClick={onToggleTheme}

@@ -160,45 +160,38 @@ export const EventsPage = ({
             </button>
           )}
 
-          {/* Role-Specific Header Action Buttons */}
-          {currentUser?.role === 'admin' ? (
-            /* ADMIN ACTIONS */
-            <>
-              <button
-                onClick={onOpenAdmin}
-                className={`px-3 py-1 text-xs sm:text-sm font-bold border-2 border-pencil rounded-lg shadow-[2px_2px_0px_#2d2d2d] flex items-center gap-1.5 cursor-pointer transition-all ${
-                  pendingApprovalsCount > 0
-                    ? 'bg-marker-red text-white hover:bg-pencil animate-pulse'
-                    : 'bg-[#ffebee] hover:bg-marker-red hover:text-white text-marker-red'
-                }`}
-              >
-                <LayoutDashboard className="w-3.5 h-3.5" />
-                <span>Moderation Desk</span>
-                {pendingApprovalsCount > 0 && (
-                  <span className="px-1.5 py-0.2 bg-white text-marker-red text-[10px] rounded-full font-bold">
-                    {pendingApprovalsCount}
-                  </span>
-                )}
-              </button>
+          {/* Portal navigation links */}
+          <button
+            onClick={() => navigate('/student')}
+            className="px-2.5 py-1 text-xs font-bold border-2 border-pencil rounded-lg bg-paper-bg hover:bg-paper-yellow transition-all cursor-pointer shadow-xs flex items-center gap-1"
+          >
+            <span>🎓 Student</span>
+          </button>
 
-              <button
-                onClick={onOpenCreateEvent}
-                className="px-3 py-1 text-xs sm:text-sm font-bold bg-white hover:bg-pencil hover:text-white text-pencil border-2 border-pencil rounded-lg shadow-[2px_2px_0px_#2d2d2d] flex items-center gap-1.5 cursor-pointer transition-all"
-              >
-                <PlusCircle className="w-3.5 h-3.5 text-marker-red" />
-                <span className="hidden md:inline">Publish Event</span>
-              </button>
-            </>
-          ) : (
-            /* STUDENT & GUEST ACTION */
-            <button
-              onClick={onOpenCreateEvent}
-              className="px-3.5 py-1 text-xs sm:text-sm font-bold bg-marker-red hover:bg-pencil text-white border-2 border-pencil rounded-lg shadow-[2px_2px_0px_#2d2d2d] flex items-center gap-1.5 cursor-pointer transition-all"
-            >
-              <PlusCircle className="w-3.5 h-3.5" />
-              <span>+ Propose Event</span>
-            </button>
-          )}
+          <button
+            onClick={() => navigate('/admin')}
+            className={`px-2.5 py-1 text-xs font-bold border-2 rounded-lg transition-all cursor-pointer shadow-xs flex items-center gap-1 ${
+              currentUser?.role === 'admin'
+                ? 'border-marker-red bg-[#ffebee] hover:bg-marker-red hover:text-white text-marker-red'
+                : 'border-pencil bg-paper-bg hover:bg-paper-yellow text-pencil'
+            }`}
+          >
+            <span>🛡️ Admin</span>
+            {pendingApprovalsCount > 0 && (
+              <span className="px-1 py-0.2 bg-marker-red text-white text-[9px] rounded-full font-bold">
+                {pendingApprovalsCount}
+              </span>
+            )}
+          </button>
+
+          {/* Create / Propose Event */}
+          <button
+            onClick={onOpenCreateEvent}
+            className="px-3 py-1 text-xs sm:text-sm font-bold bg-marker-red hover:bg-pencil text-white border-2 border-pencil rounded-lg shadow-[2px_2px_0px_#2d2d2d] flex items-center gap-1.5 cursor-pointer transition-all"
+          >
+            <PlusCircle className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">{currentUser?.role === 'admin' ? 'Publish Event' : '+ Propose'}</span>
+          </button>
 
           <button
             onClick={onToggleTheme}
