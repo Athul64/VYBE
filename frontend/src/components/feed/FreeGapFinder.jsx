@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Clock, Sparkles, MapPin, Footprints, Calendar, ArrowRight } from 'lucide-react';
 import { SketchButton } from '../common/SketchButton';
+import { API_BASE } from '../../config';
 
 export const FreeGapFinder = ({
   isOpen,
@@ -21,7 +22,7 @@ export const FreeGapFinder = ({
   const fetchFreeGaps = async () => {
     setLoading(true);
     try {
-      const resp = await fetch(`http://localhost:8000/api/free-gaps?student=${activePersonaKey}`);
+      const resp = await fetch(`${API_BASE}/free-gaps?student=${activePersonaKey}`);
       const data = await resp.json();
       setGaps(data);
     } catch (err) {

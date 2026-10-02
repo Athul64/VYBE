@@ -4,6 +4,7 @@ import {
   TrendingUp, RefreshCw, ShieldCheck, Check, X, Clock, MapPin, Sparkles, AlertCircle
 } from 'lucide-react';
 import { SketchButton } from '../common/SketchButton';
+import { API_BASE } from '../../config';
 
 export const AdminDashboard = ({ 
   isOpen, 
@@ -28,8 +29,8 @@ export const AdminDashboard = ({
     setFeedbackMsg(null);
     try {
       const [statsRes, pendingRes] = await Promise.all([
-        fetch('http://localhost:8000/api/admin/stats'),
-        fetch('http://localhost:8000/api/admin/pending-events')
+        fetch(`${API_BASE}/admin/stats`),
+        fetch(`${API_BASE}/admin/pending-events`)
       ]);
       const statsData = await statsRes.json();
       const pendingData = await pendingRes.json();
@@ -46,7 +47,7 @@ export const AdminDashboard = ({
     setActionLoadingId(eventId);
     setFeedbackMsg(null);
     try {
-      const resp = await fetch('http://localhost:8000/api/admin/moderate-event', {
+      const resp = await fetch(`${API_BASE}/admin/moderate-event`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

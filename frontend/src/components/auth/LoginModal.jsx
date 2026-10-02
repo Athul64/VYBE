@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Lock, UserCheck, Shield, KeyRound, Sparkles, AlertCircle, ArrowRight, UserPlus, CheckCircle2 } from 'lucide-react';
 import { SketchButton } from '../common/SketchButton';
+import { API_BASE } from '../../config';
 
 export const LoginModal = ({
   isOpen,
@@ -35,7 +36,7 @@ export const LoginModal = ({
     setLoading(true);
 
     try {
-      const resp = await fetch('http://localhost:8000/api/login', {
+      const resp = await fetch(`${API_BASE}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -69,7 +70,7 @@ export const LoginModal = ({
     setLoading(true);
 
     try {
-      const resp = await fetch('http://localhost:8000/api/register', {
+      const resp = await fetch(`${API_BASE}/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

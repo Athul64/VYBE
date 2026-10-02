@@ -12,8 +12,7 @@ import { AdminDashboard } from './components/organizer/AdminDashboard';
 import { LoginModal } from './components/auth/LoginModal';
 
 import { useSpeech } from './hooks/useSpeech';
-
-const API_BASE = 'http://localhost:8000/api';
+import { API_BASE } from './config';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {

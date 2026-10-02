@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { X, CheckCircle, Ticket, MapPin, Clock, Calendar } from 'lucide-react';
 import { SketchButton } from '../common/SketchButton';
+import { API_BASE } from '../../config';
 
 export const QrPassModal = ({
   event,
@@ -33,7 +34,7 @@ export const QrPassModal = ({
   const handleSimulateCheckin = async () => {
     setLoading(true);
     try {
-      const resp = await fetch('http://localhost:8000/api/checkin', {
+      const resp = await fetch(`${API_BASE}/checkin`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -9,6 +9,7 @@ import {
 import { EventCard } from '../components/feed/EventCard';
 import { ClashBanner } from '../components/feed/ClashBanner';
 import { CampusMapSvg } from '../components/map/CampusMapSvg';
+import { API_BASE } from '../config';
 
 export const EventsPage = ({
   personas = {},
@@ -70,7 +71,7 @@ export const EventsPage = ({
     setLoadingMyEvents(true);
     try {
       const studentId = currentUser?.student_id || 'ADMIN';
-      const resp = await fetch(`http://localhost:8000/api/student/my-events?student_id=${studentId}`);
+      const resp = await fetch(`${API_BASE}/student/my-events?student_id=${studentId}`);
       const data = await resp.json();
       setMyEvents(Array.isArray(data) ? data : []);
     } catch (err) {

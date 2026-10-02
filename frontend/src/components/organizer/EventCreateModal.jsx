@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { X, CalendarPlus, AlertTriangle, CheckCircle, Sparkles, Building2, Upload, Image as ImageIcon, Trash2, Link } from 'lucide-react';
 import { SketchButton } from '../common/SketchButton';
+import { API_BASE } from '../../config';
 
 export const EventCreateModal = ({
   isOpen,
@@ -100,7 +101,7 @@ export const EventCreateModal = ({
     try {
       const formData = new FormData();
       formData.append('file', file);
-      const resp = await fetch('http://localhost:8000/api/upload', {
+      const resp = await fetch(`${API_BASE}/upload`, {
         method: 'POST',
         body: formData
       });
@@ -132,7 +133,7 @@ export const EventCreateModal = ({
     setLoading(true);
 
     try {
-      const resp = await fetch('http://localhost:8000/api/events', {
+      const resp = await fetch(`${API_BASE}/events`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
