@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 
 import { LandingPage } from './pages/LandingPage';
 import { EventsPage } from './pages/EventsPage';
@@ -58,6 +58,18 @@ class ErrorBoundary extends React.Component {
 }
 
 export default function App() {
+  return (
+    <BrowserRouter>
+      <ErrorBoundary>
+        <AppContent />
+      </ErrorBoundary>
+    </BrowserRouter>
+  );
+}
+
+function AppContent() {
+  const navigate = useNavigate();
+
   // Authentication & Session
   // Authentication & Session - Default strictly to Logged Out (Visitor/Guest Mode)
   const [currentUser, setCurrentUser] = useState(() => {
@@ -180,6 +192,15 @@ export default function App() {
     }
     fetchPendingCount();
     fetchEvents(sessionData.persona_key || activePersonaKey);
+
+    // Auto-redirect by role:
+    // If admin (admin / admin123) -> redirect to Admin Portal (/admin)
+    // Otherwise (students) -> redirect to Student Portal (/student)
+    if (sessionData.role === 'admin' || sessionData.student_id?.toLowerCase() === 'admin') {
+      navigate('/admin');
+    } else {
+      navigate('/student');
+    }
   };
 
   const handleLogout = () => {
@@ -187,6 +208,7 @@ export default function App() {
     setCurrentUser(null);
     setActivePersonaKey(null);
     fetchEvents(null);
+    navigate('/');
   };
 
   // Fetch Ranked Events when Persona changes
@@ -327,9 +349,8 @@ export default function App() {
   const categories = ['All', 'Workshop', 'Hackathon', 'Competition', 'Design', 'Cultural'];
 
   return (
-    <BrowserRouter>
-      <ErrorBoundary>
-        <Routes>
+    <>
+      <Routes>
         {/* 1. Hero Landing Page */}
         <Route 
           path="/" 
@@ -483,7 +504,6 @@ export default function App() {
           } 
         />
       </Routes>
-      </ErrorBoundary>
 
       {/* Global Modals */}
       <LoginModal
@@ -532,6 +552,6 @@ export default function App() {
           fetchPendingCount();
         }}
       />
-    </BrowserRouter>
+    </>
   );
 }
