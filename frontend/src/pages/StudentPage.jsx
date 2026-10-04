@@ -98,13 +98,6 @@ export const StudentPage = ({
             <span className="hidden sm:inline">Events & Map</span>
           </button>
 
-          <button
-            onClick={() => navigate('/admin')}
-            className="px-3 py-1.5 font-bold text-xs border-2 border-pencil rounded-lg bg-paper-bg hover:bg-paper-yellow transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
-          >
-            <ShieldCheck className="w-4 h-4 text-marker-red" />
-            <span className="hidden sm:inline">Admin Desk</span>
-          </button>
 
           {/* Theme Toggle */}
           <button

@@ -160,29 +160,27 @@ export const EventsPage = ({
             </button>
           )}
 
-          {/* Portal navigation links */}
-          <button
-            onClick={() => navigate('/student')}
-            className="px-2.5 py-1 text-xs font-bold border-2 border-pencil rounded-lg bg-paper-bg hover:bg-paper-yellow transition-all cursor-pointer shadow-xs flex items-center gap-1"
-          >
-            <span>🎓 Student</span>
-          </button>
-
-          <button
-            onClick={() => navigate('/admin')}
-            className={`px-2.5 py-1 text-xs font-bold border-2 rounded-lg transition-all cursor-pointer shadow-xs flex items-center gap-1 ${
-              currentUser?.role === 'admin'
-                ? 'border-marker-red bg-[#ffebee] hover:bg-marker-red hover:text-white text-marker-red'
-                : 'border-pencil bg-paper-bg hover:bg-paper-yellow text-pencil'
-            }`}
-          >
-            <span>🛡️ Admin</span>
-            {pendingApprovalsCount > 0 && (
-              <span className="px-1 py-0.2 bg-marker-red text-white text-[9px] rounded-full font-bold">
-                {pendingApprovalsCount}
-              </span>
-            )}
-          </button>
+          {/* Dynamic Role Portal Link */}
+          {currentUser?.role === 'admin' ? (
+            <button
+              onClick={() => navigate('/admin')}
+              className="px-2.5 py-1 text-xs font-bold border-2 border-marker-red bg-[#ffebee] hover:bg-marker-red hover:text-white text-marker-red rounded-lg transition-all cursor-pointer shadow-xs flex items-center gap-1"
+            >
+              <span>🛡️ Admin Desk</span>
+              {pendingApprovalsCount > 0 && (
+                <span className="px-1 py-0.2 bg-marker-red text-white text-[9px] rounded-full font-bold">
+                  {pendingApprovalsCount}
+                </span>
+              )}
+            </button>
+          ) : currentUser ? (
+            <button
+              onClick={() => navigate('/student')}
+              className="px-2.5 py-1 text-xs font-bold border-2 border-pencil rounded-lg bg-paper-bg hover:bg-paper-yellow transition-all cursor-pointer shadow-xs flex items-center gap-1"
+            >
+              <span>🎓 Student Portal</span>
+            </button>
+          ) : null}
 
           {/* Create / Propose Event */}
           <button

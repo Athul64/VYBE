@@ -10,7 +10,6 @@ import { StudentPage } from './pages/StudentPage';
 import { QrPassModal } from './components/student/QrPassModal';
 import { FreeGapFinder } from './components/feed/FreeGapFinder';
 import { EventCreateModal } from './components/organizer/EventCreateModal';
-import { AdminDashboard } from './components/organizer/AdminDashboard';
 import { LoginModal } from './components/auth/LoginModal';
 
 import { useSpeech } from './hooks/useSpeech';
@@ -153,7 +152,6 @@ function AppContent() {
   const [isPassModalOpen, setIsPassModalOpen] = useState(false);
   const [isFreeGapOpen, setIsFreeGapOpen] = useState(false);
   const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
-  const [isAdminOpen, setIsAdminOpen] = useState(false);
 
   // TTS Voice Hook
   const { 
@@ -364,7 +362,7 @@ function AppContent() {
               onOpenLogin={() => setIsLoginOpen(true)}
               onLogout={handleLogout}
               pendingApprovalsCount={pendingApprovalsCount}
-              onOpenAdmin={() => setIsAdminOpen(true)}
+              onOpenAdmin={() => navigate('/admin')}
               campusNodes={campusNodes}
               campusEdges={campusEdges}
               theme={theme}
@@ -393,7 +391,7 @@ function AppContent() {
               setActiveClash={setActiveClash}
               onOpenFreeGap={() => setIsFreeGapOpen(true)}
               onOpenCreateEvent={() => setIsCreateEventOpen(true)}
-              onOpenAdmin={() => setIsAdminOpen(true)}
+              onOpenAdmin={() => navigate('/admin')}
               currentUser={currentUser}
               onOpenLogin={() => setIsLoginOpen(true)}
               onLogout={handleLogout}
@@ -495,7 +493,7 @@ function AppContent() {
               onOpenLogin={() => setIsLoginOpen(true)}
               onLogout={handleLogout}
               pendingApprovalsCount={pendingApprovalsCount}
-              onOpenAdmin={() => setIsAdminOpen(true)}
+              onOpenAdmin={() => navigate('/admin')}
               campusNodes={campusNodes}
               campusEdges={campusEdges}
               theme={theme}
@@ -539,15 +537,6 @@ function AppContent() {
         currentUser={currentUser}
         onOpenLogin={() => setIsLoginOpen(true)}
         onEventCreated={() => {
-          fetchEvents(activePersonaKey);
-          fetchPendingCount();
-        }}
-      />
-
-      <AdminDashboard
-        isOpen={isAdminOpen}
-        onClose={() => setIsAdminOpen(false)}
-        onEventApproved={() => {
           fetchEvents(activePersonaKey);
           fetchPendingCount();
         }}

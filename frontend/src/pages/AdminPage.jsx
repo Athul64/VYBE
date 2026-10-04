@@ -4,7 +4,7 @@ import {
   ShieldCheck, LayoutDashboard, Building2, AlertTriangle, 
   CheckCircle2, TrendingUp, RefreshCw, Check, X, Clock, 
   MapPin, Sparkles, AlertCircle, ArrowLeft, ArrowRight,
-  Lock, KeyRound, UserCheck, Trash2, Calendar
+  Lock, KeyRound, UserCheck, Trash2, Calendar, Compass
 } from 'lucide-react';
 import { API_BASE } from '../config';
 
@@ -149,13 +149,6 @@ export const AdminPage = ({
             <span className="hidden sm:inline">Events & Map</span>
           </button>
 
-          <button
-            onClick={() => navigate('/student')}
-            className="px-3 py-1.5 font-bold text-xs border-2 border-pencil rounded-lg bg-paper-bg hover:bg-paper-yellow transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
-          >
-            <UserCheck className="w-4 h-4 text-marker-red" />
-            <span className="hidden sm:inline">Student Portal</span>
-          </button>
 
           {/* Theme Toggle */}
           <button

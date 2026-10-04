@@ -68,31 +68,31 @@ export const LandingPage = ({
             </button>
           )}
 
-          {/* Student Portal Link */}
-          <button
-            onClick={() => navigate('/student')}
-            className="px-3 py-1.5 font-bold text-xs border-2 border-pencil rounded-lg bg-paper-bg hover:bg-paper-yellow transition-all cursor-pointer flex items-center gap-1 shadow-xs"
-          >
-            <span>🎓 Student Portal</span>
-          </button>
+          {/* Dynamic Role-Based Portal Button */}
+          {currentUser?.role === 'admin' && (
+            <button
+              onClick={() => navigate('/admin')}
+              className="px-3 py-1.5 font-bold text-xs border-2 border-marker-red bg-[#ffebee] hover:bg-marker-red hover:text-white text-marker-red rounded-lg transition-all cursor-pointer flex items-center gap-1.5 shadow-xs"
+            >
+              <span>🛡️ Admin Desk</span>
+              {pendingApprovalsCount > 0 && (
+                <span className="px-1.5 py-0.2 bg-marker-red text-white text-[10px] rounded-full font-bold">
+                  {pendingApprovalsCount}
+                </span>
+              )}
+            </button>
+          )}
 
-          {/* Admin Desk Link */}
-          <button
-            onClick={() => navigate('/admin')}
-            className={`px-3 py-1.5 font-bold text-xs border-2 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 shadow-xs ${
-              currentUser?.role === 'admin'
-                ? 'border-marker-red bg-[#ffebee] hover:bg-marker-red hover:text-white text-marker-red'
-                : 'border-pencil bg-paper-bg hover:bg-paper-yellow text-pencil'
-            }`}
-          >
-            <span>🛡️ Admin Desk</span>
-            {pendingApprovalsCount > 0 && (
-              <span className="px-1.5 py-0.2 bg-marker-red text-white text-[10px] rounded-full font-bold">
-                {pendingApprovalsCount}
-              </span>
-            )}
-          </button>
+          {currentUser && currentUser.role !== 'admin' && (
+            <button
+              onClick={() => navigate('/student')}
+              className="px-3 py-1.5 font-bold text-xs border-2 border-pencil rounded-lg bg-paper-bg hover:bg-paper-yellow transition-all cursor-pointer flex items-center gap-1.5 shadow-xs"
+            >
+              <span>🎓 My Student Portal</span>
+            </button>
+          )}
 
+          {/* Theme Toggle */}
           <button
             onClick={onToggleTheme}
             title={theme === 'dark' ? "Switch to Light Notebook" : "Switch to Dark Slate Blackboard"}
@@ -101,11 +101,12 @@ export const LandingPage = ({
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
 
+          {/* Events Feed Link */}
           <button
             onClick={() => navigate('/events')}
             className="px-4 py-2 font-bold text-xs sm:text-sm border-2 border-pencil rounded-xl bg-paper-yellow hover:bg-pencil hover:text-white transition-all cursor-pointer flex items-center gap-1.5 shadow-[2px_2px_0px_#2d2d2d]"
           >
-            <span>Open Events Notebook</span>
+            <span>Events & Map</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
@@ -174,13 +175,31 @@ export const LandingPage = ({
 
             {/* Big Primary Action Button */}
             <div className="pt-4 flex items-center gap-3 border-t border-pencil/20">
-              <button
-                onClick={() => navigate('/events')}
-                className="px-6 py-3 bg-marker-red hover:bg-pencil text-white font-bold text-base sm:text-lg border-2 border-pencil rounded-xl shadow-[3px_3px_0px_#2d2d2d] transition-all cursor-pointer flex items-center gap-2"
-              >
-                <span>Enter Campus Events Notebook</span>
-                <ArrowRight className="w-5 h-5 stroke-[3]" />
-              </button>
+              {currentUser?.role === 'admin' ? (
+                <button
+                  onClick={() => navigate('/admin')}
+                  className="px-6 py-3 bg-marker-red hover:bg-pencil text-white font-bold text-base sm:text-lg border-2 border-pencil rounded-xl shadow-[3px_3px_0px_#2d2d2d] transition-all cursor-pointer flex items-center gap-2"
+                >
+                  <span>Open Admin Moderation Desk</span>
+                  <ArrowRight className="w-5 h-5 stroke-[3]" />
+                </button>
+              ) : currentUser ? (
+                <button
+                  onClick={() => navigate('/student')}
+                  className="px-6 py-3 bg-marker-red hover:bg-pencil text-white font-bold text-base sm:text-lg border-2 border-pencil rounded-xl shadow-[3px_3px_0px_#2d2d2d] transition-all cursor-pointer flex items-center gap-2"
+                >
+                  <span>Open My Student Portal</span>
+                  <ArrowRight className="w-5 h-5 stroke-[3]" />
+                </button>
+              ) : (
+                <button
+                  onClick={() => navigate('/events')}
+                  className="px-6 py-3 bg-marker-red hover:bg-pencil text-white font-bold text-base sm:text-lg border-2 border-pencil rounded-xl shadow-[3px_3px_0px_#2d2d2d] transition-all cursor-pointer flex items-center gap-2"
+                >
+                  <span>Explore Campus Events & Map</span>
+                  <ArrowRight className="w-5 h-5 stroke-[3]" />
+                </button>
+              )}
             </div>
           </div>
 
